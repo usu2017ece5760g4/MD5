@@ -1,4 +1,4 @@
-// Joshua Lynn a01799554, Braydn Clark a01091991
+// Joshua Lynn a01799554, Braydn Clark a01091991, John Call a01283897
 
 #include <getopt.h>
 #include <stdlib.h>
@@ -7,9 +7,16 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <cstdint>
 
 
+typedef unsigned char byte;
+typedef unsigned int uint;
 
+union chunk {
+	byte bytes[64];
+	uint words[16];
+};
 
 
 int main(int argc, char **argv)
@@ -73,12 +80,11 @@ else if(sflag>1 || Eflag>1 || bflag>1 || tflag>1){
 
 */
 
-unsigned long long int test, size, pad, L, a,b,c,d;
+uint size = 5;
+byte message[5] = { 0x68, 0x65, 0x6c, 0x6c, 0x6f };
+
+unsigned long long int pad, L, a,b,c,d;
 //unsigned int t[64];
-
-test = 0x68656c6c6f;
-
-size = sizeof(test);
 
 test = (test<<1)+1;
 
@@ -150,5 +156,5 @@ printf("ABCD = %02x%02x%02x%02x\n" , a,b,c,d);
 
 
 
-    return 0;
+	return 0;
 }
