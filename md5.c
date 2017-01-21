@@ -106,9 +106,47 @@ int t[64]= {0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,0xf57c0faf, 0x4787c62
  
 
 printf("ABCD = %02x%02x%02x%02x\n" , a,b,c,d);
+/*
 
+//for each 512-bit chunk of message
+ //   break chunk into sixteen 32-bit words M[j], 0 ≤ j ≤ 15 // we only have one 512bit chunk right now so im not thingking about others 
+//Initialize hash value for this chunk:
+     int A = a;
+     int B = b;
+     int C = c;
+     int D = d;
+//Main loop:
+    for ( i =0;i<64:i++){
+        if (0 ≤ i ≤ 15){
+            F = (B & C) | ((~B) & D);
+            g = i;
+	}
+        else if (16 ≤ i ≤ 31){
+            F = (D & B) | ((~D) & C);
+            g = (5*i + 1) % 16;
+	}
+        else if (32 ≤ i ≤ 47){
+            F = B ^ C ^ D;
+            g = (3*i + 5) % 16;
+	}
+        else if (48 ≤ i ≤ 63){
+            F = C ^ (B | (~D));
+            g = (7*i) % 16;
+	};
+//Be wary of the below definitions of a,b,c,d
+        dTemp = D;
+        D = C;
+        C = B;
+        B = B + leftrotate((A + F + K[i] + M[g]), s[i]);
+        A = dTemp;
+    }
+//Add this chunk's hash to result so far:
+    a0 := a0 + A
+    b0 := b0 + B
+    c0 := c0 + C
+    d0 := d0 + D
 
-
+*/
 
 
 
