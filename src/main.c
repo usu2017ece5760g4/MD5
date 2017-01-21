@@ -1,5 +1,13 @@
+//---------------------------------------------------------------------------------------------------------------------+
+// MD5 Hashing Algorithm                                                                                               |
+// USU ECE 5760 Project 1                                                                                              |
+// Braydn Clark A01091991                                                                                              |
+// Joshua Lynn A01799554                                                                                               |
+// John Call A01283897                                                                                                 |
+//---------------------------------------------------------------------------------------------------------------------+
 #include <stdlib.h>
 #include <stdio.h>
+#include <getopt.h>
 
 typedef unsigned int uint;
 
@@ -91,85 +99,86 @@ inline void hash_f(unsigned int n) {
 }
 
 void main(int argc, char **argv) {
+	extern char *optarg; // these are for getopt. 
+	extern int optind;
 
-extern char *optarg; // these are for getopt. 
-extern int optind;
+// getopt is awesome but it took a while to figure out how to use it
+// this site helped me out https://www.cs.rutgers.edu/~pxk/416/notes/c-tutorials/getopt.html
+// i put that here more for my own reference because I'm sure ill use getopt again.
+	int verbose =0,sflag=0,bflag=0,tflag=0;
+	char *t, *s;
+	char c;
+	//this is just for taking in command line arguments.
+		while ((c = getopt(argc, argv, "hvbs:t:")) != -1){
+			switch(c){
+				case 'h':
+					// print usage info here 
+					printf("Usage: ./alpha [-hvb] -s <string> -t <string>\n Options:\n  -h           Print this help message.\n  -v           Optional verbose flag.\n  -b           Run benchmark hashing all strings aaaaaa - zzzzzz\n  -s <string>  Run md5 hash on single string.\n  -t <string>  Brute force md5 hash and compair to this string.\n \nExamples:\n  linux>  ./alpha -s helloworld\n  linux>  ./alpha -t 6f5902ac237024bdd0c176cb93063dc4\n");
+					exit(1);
+					break;	
+				case 'v':  // verbose mode does nothing at the moment 
+					verbose=1;
+					break;			
+				case 's':  // run a single md5 hash on given string
+					sflag=sflag+1;
+					s = optarg;
+					break;
+				case 'b': // benchmark all posible 6 character pw
+					bflag=bflag+1;
+		
+					break;
+				case 't': //find target hash
+					tflag=tflag+1;
+					t=optarg;
+					break;
+				case '?':	
+					// print something about not having the right stuffs
+					exit(1);
+					break;
+					
+			}
 
-int verbose =0,sflag=0,bflag=0,tflag=0;
-char *t, *s;
-char c;
-//this is just for taking in command line arguments.
-	while ((c = getopt(argc, argv, "hvbs:t:")) != -1){
-		switch(c){
-			case 'h':
-				// print usage info here 
-				printf("Usage: ./alpha [-hvb] -s <string> -t <string>\n Options:\n  -h           Print this help message.\n  -v           Optional verbose flag.\n  -b           Run benchmark hashing all strings aaaaaa - zzzzzz\n  -s <string>  Run md5 hash on single string.\n  -t <string>  Brute force md5 hash and compair to this string.\n \nExamples:\n  linux>  ./alpha -s helloworld\n  linux>  ./alpha -t 6f5902ac237024bdd0c176cb93063dc4\n");
-				exit(1);
-				break;	
-			case 'v':  // verbose mode does nothing at the moment 
-				verbose=1;
-				break;			
-			case 's':  // run a single md5 hash on given string
-				sflag=sflag+1;
-				s = optarg;
-				break;
-			case 'b': // benchmark all posible 6 character pw
-				bflag=bflag+1;
-	
-				break;
-			case 't': //find target hash
-				tflag=tflag+1;
-				t=optarg;
-				break;
-			case '?':	
-				// print something about not having the right stuffs
-				exit(1);
-				break;
-				
 		}
 
+	if(sflag==0 && bflag==0 && tflag==0){
+		printf("you didn't have all the needed command-line arguments\n");
+		exit(1);
+	}
+	else if (sflag + bflag + tflag>1){
+		printf("you have too many command-line arguments\n");
+	}
+	else if(sflag>1 || bflag>1 || tflag>1){
+		printf("you used some arguments more than once\n");
+		exit(1);
+	};
+
+
+
+	printf("worked so far\n");
+
+
+	if(sflag==1){
+		unsigned int hash;
+		md5(s, sizeof(s), hash);
+		printf("%02x\n", hash);
+	}
+	else if(bflag==1){
+		hash_n(6);
+	}
+	else if(tflag==1){
+		hash_f(1);
+		hash_f(2);
+		hash_f(3);
+		hash_f(4);
+		hash_f(5);
+		hash_f(6);
+		hash_f(7);
+		hash_f(8);
+		hash_f(9);
+		hash_f(10);
+		
 	}
 
-if(sflag==0 && bflag==0 && tflag==0){
-	printf("you didn't have all the needed command-line arguments\n");
-	exit(1);
-}
-else if (sflag + bflag + tflag>1){
-	printf("you have too many command-line arguments\n");
-}
-else if(sflag>1 || bflag>1 || tflag>1){
-	printf("you used some arguments more than once\n");
-	exit(1);
-};
-
-
-
-printf("worked so far\n");
-
-
-if(sflag==1){
-	unsigned int hash;
-	md5(s, sizeof(s), hash);
-	printf("%02x\n", hash);
-}
-else if(bflag==1){
-	hash_n(6);
-}
-else if(tflag==1){
-	hash_f(1);
-	hash_f(2);
-	hash_f(3);
-	hash_f(4);
-	hash_f(5);
-	hash_f(6);
-	hash_f(7);
-	hash_f(8);
-	hash_f(9);
-	hash_f(10);
-	
-}
-
-//uint x = str2hex(t);
+	//uint x = str2hex(t);
 
 }
-
