@@ -1,4 +1,4 @@
-// Joshua Lynn a01799554, Braydn Clark a01091991
+// Joshua Lynn a01799554, Braydn Clark a01091991, John Call a01283897
 
 #include <getopt.h>
 #include <stdlib.h>
@@ -112,5 +112,5 @@ printf("ABCD = %02x%02x%02x%02x\n" , a,b,c,d);
 
 
 
-    return 0;
+	return 0;
 }
