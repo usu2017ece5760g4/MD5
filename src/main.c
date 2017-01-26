@@ -112,8 +112,18 @@ void main(int argc, char **argv) {
 		while ((c = getopt(argc, argv, "hvbs:t:")) != -1) {
 			switch (c) {
 				case 'h':
-					// print usage info here 
-					printf("Usage: ./alpha [-hvb] -s <string> -t <string>\n Options:\n  -h           Print this help message.\n  -v           Optional verbose flag.\n  -b           Run benchmark hashing all strings aaaaaa - zzzzzz\n  -s <string>  Run md5 hash on single string.\n  -t <string>  Brute force md5 hash and compair to this string.\n \nExamples:\n  linux>  ./alpha -s helloworld\n  linux>  ./alpha -t 6f5902ac237024bdd0c176cb93063dc4\n");
+					// print usage info here
+					printf("Usage: ./alpha [-hvb] -s <string> -t <string>\n"
+						   " Options:\n  -h           Print this help message.\n"
+						   "  -v           Optional verbose flag.\n"
+						   "  -b           Run benchmark hashing all strings aaaaaa - zzzzzz\n"
+						   "  -s <string>  Run md5 hash on single string.\n"
+						   "  -t <string>  Brute force md5 hash and compare to this string.\n"
+						   "\n"
+						   "Examples:\n"
+						   "  linux>  ./alpha -s helloworld\n"
+						   "  linux>  ./alpha -t 6f5902ac237024bdd0c176cb93063dc4\n"
+						   "");
 					exit(1);
 					break;
 
