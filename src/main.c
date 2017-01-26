@@ -9,11 +9,12 @@
 #include <stdio.h>
 #include <getopt.h>
 
+typedef unsigned char byte;
 typedef unsigned int uint;
 
-unsigned int power(unsigned int a, unsigned int b) {
-	unsigned int out = 1;
-	unsigned int square = a*a;
+uint power(uint a, uint b) {
+	uint out = 1;
+	uint square = a*a;
 	while (b >= 2) {
 		out *= square;
 		b -= 2;
@@ -24,13 +25,13 @@ unsigned int power(unsigned int a, unsigned int b) {
 	return out;
 }
 
-unsigned int loop_alpha(unsigned int n, unsigned char** out) {
+uint loop_alpha(uint n, byte** out) {
 	// Compute the size we need for out: N = 26 ^ n
-	unsigned int size;
+	uint size;
 	size = power(26, n);
 
 	// Create a list of size N
-	unsigned char** list = malloc(sizeof(char*) * size);
+	byte** list = malloc(sizeof(char*) * size);
 	for (uint i = 0; i < n; i++) {
 		list[i] = malloc(sizeof(char) * n);
 	}
@@ -46,7 +47,7 @@ unsigned int loop_alpha(unsigned int n, unsigned char** out) {
 	//increment at digit
 	// if > 'z' set digit = 'a' and increment digit - 1
 	// digit < 0 break
-	unsigned int digit = n - 1;
+	uint digit = n - 1;
 
 	i = 0;
 	memcpy(list[i++], str, n);
@@ -71,24 +72,24 @@ unsigned int loop_alpha(unsigned int n, unsigned char** out) {
 	return size;
 }
 
-unsigned char* list;
-unsigned int size;
-inline void hash_n(unsigned int n) {
+byte* list;
+uint size;
+inline void hash_n(uint n) {
 	size = loop_alpha(n, &list);
 	int i;
 	for (i = 0; i < size; ++i) {
-		unsigned int* hash; // size 4
+		uint* hash; // size 4
 	//	hash = md5(list[i], n);
 		printf("list[i] hashes to %02x\n", hash);
 	}
 	free(list);
 }
 
-inline void hash_f(unsigned int n) {
+inline void hash_f(uint n) {
 	size = loop_alpha(n, &list);
 	int i;
 	for (i = 0; i < size; ++i) {
-		unsigned int* hash; // size 4
+		uint* hash; // size 4
 		//hash = md5(list[i], n);
 		if (hash == t) {
 			printf("%s hashes to %s\n", list[i], t);
@@ -170,7 +171,7 @@ void main(int argc, char **argv) {
 
 
 	if (sflag == 1) {
-		unsigned int hash;
+		uint hash;
 		md5(s, sizeof(s), hash);
 		printf("%02x\n", hash);
 	}
