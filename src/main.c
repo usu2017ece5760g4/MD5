@@ -8,71 +8,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <getopt.h>
+#include "strgen.h"
 
-typedef unsigned char byte;
-typedef unsigned int uint;
-
-uint power(uint a, uint b) {
-	uint out = 1;
-	uint square = a*a;
-	while (b >= 2) {
-		out *= square;
-		b -= 2;
-	}
-	if (b > 1) {
-		out *= a;
-	}
-	return out;
-}
-
-uint loop_alpha(uint n, byte** out) {
-	// Compute the size we need for out: N = 26 ^ n
-	uint size;
-	size = power(26, n);
-
-	// Create a list of size N
-	byte** list = malloc(sizeof(char*) * size);
-	for (uint i = 0; i < size; i++) {
-		list[i] = malloc(sizeof(char) * n);
-	}
-
-	char* str = malloc(sizeof(char) * n);
-
-	int i;
-	for (i = 0; i < n; i++) {  // sets initial value to all a
-		str[i] = 'a';
-	}
-
-	list[0] = str;
-	//increment at digit
-	// if > 'z' set digit = 'a' and increment digit - 1
-	// digit < 0 break
-	uint digit = n - 1;
-
-	i = 0;
-	memcpy(list[i++], str, n);
-	while (i < size) {
-		++str[digit];
-		if (str[digit] > 'z') {
-			str[digit] = 'a';
-			if (--digit < 0) {
-				break;
-			}
-			continue;
-		}
-		else if (digit < n - 1) {
-			digit = n - 1;
-		}
-
-		memcpy(list[i++], str, n);
-	}
-
-	// Give caller access to the list
-	out = list;
-	return size;
-}
-
-byte* list;
+byte** list;
 uint size;
 inline void hash_n(uint n) {
 	size = loop_alpha(n, &list);
@@ -82,6 +20,7 @@ inline void hash_n(uint n) {
 	//	hash = md5(list[i], n);
 		printf("list[i] hashes to %02x\n", hash);
 	}
+	// need to free(list[i])
 	free(list);
 }
 
@@ -96,6 +35,7 @@ inline void hash_f(uint n) {
 			break; // this is not right and we need to convert the string to a 128 bit int
 		}
 	}
+	// need to free(list[i])
 	free(list);
 }
 
