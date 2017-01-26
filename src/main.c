@@ -32,7 +32,7 @@ uint loop_alpha(uint n, byte** out) {
 
 	// Create a list of size N
 	byte** list = malloc(sizeof(char*) * size);
-	for (uint i = 0; i < n; i++) {
+	for (uint i = 0; i < size; i++) {
 		list[i] = malloc(sizeof(char) * n);
 	}
 
