@@ -57,17 +57,17 @@ void compress(uint* hash, chunk* block) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
-// Primary md5 function: returns the 128-bit hash (dynamically alocated) of "msg" with "n" bytes                       |
+// Primary md5 function: returns the 128-bit hash (dynamically allocated) of "msg" with "n" bytes                      |
 //---------------------------------------------------------------------------------------------------------------------+
 uint* md5(byte* msg, uint n) {
 	uint* hash = malloc(4 * sizeof(uint));
 	memcpy(hash, IV, 4);
-	
+
 	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
 	uint chunks = ((n + 8) / 64) + 1;
 	uint remainder = (n + 8) % 64;
 	chunk** parts = malloc(chunks * sizeof(chunk*));
-	
+
 	uint i = 0;
 	for (uint i = 0; i < chunks - 1; ++i) {
 		parts[i] = msg + (i * 64);
@@ -77,11 +77,11 @@ uint* md5(byte* msg, uint n) {
 	last.bytes[remainder] = 0x80;
 	last.words[15] = n;
 	parts[chunks - 1] = &last;
-	
+
 	for (uint i = 0; i < chunks; ++i) {
 		compress(hash, parts[i]);
 	}
-	
+
 	free(parts);
 	return hash;
 }

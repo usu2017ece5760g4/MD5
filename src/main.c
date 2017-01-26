@@ -38,13 +38,13 @@ unsigned int loop_alpha(unsigned int n, unsigned char** out) {
 	char* str = malloc(sizeof(char) * n);
 
 	int i;
-	for (i = 0; i < n; i++) {  // sets initial value to all a 
+	for (i = 0; i < n; i++) {  // sets initial value to all a
 		str[i] = 'a';
 	}
 
 	list[0] = str;
 	//increment at digit
-	// if > 'z' set digit = 'a' and increment digit - 1	
+	// if > 'z' set digit = 'a' and increment digit - 1
 	// digit < 0 break
 	unsigned int digit = n - 1;
 
@@ -92,14 +92,14 @@ inline void hash_f(unsigned int n) {
 		//hash = md5(list[i], n);
 		if (hash == t) {
 			printf("%s hashes to %s\n", list[i], t);
-			break; // this is not right and we need to convert the string to a 128 bit int					
+			break; // this is not right and we need to convert the string to a 128 bit int
 		}
 	}
 	free(list);
 }
 
 void main(int argc, char **argv) {
-	extern char *optarg; // these are for getopt. 
+	extern char *optarg; // these are for getopt.
 	extern int optind;
 
 // getopt is awesome but it took a while to figure out how to use it
@@ -127,7 +127,7 @@ void main(int argc, char **argv) {
 					exit(1);
 					break;
 
-				case 'v':  // verbose mode does nothing at the moment 
+				case 'v':  // verbose mode does nothing at the moment
 					verbose = 1;
 					break;
 
@@ -136,7 +136,7 @@ void main(int argc, char **argv) {
 					s = optarg;
 					break;
 
-				case 'b': // benchmark all posible 6 character pw
+				case 'b': // benchmark all possible 6 character pw
 					bflag = bflag + 1;
 					break;
 
@@ -188,9 +188,7 @@ void main(int argc, char **argv) {
 		hash_f(8);
 		hash_f(9);
 		hash_f(10);
-
 	}
 
 	//uint x = str2hex(t);
-
 }
