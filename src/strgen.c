@@ -3,11 +3,11 @@
 unsigned int power(unsigned int a, unsigned int b) {
 	unsigned int out = 1;
 	unsigned int square = a*a;
-	while (b >= 2) {
+	while (b > 1) {
 		out *= square;
 		b -= 2;
 	}
-	if (b > 1) {
+	if (b > 0) {
 		out *= a;
 	}
 	return out;
