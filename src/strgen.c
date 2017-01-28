@@ -24,7 +24,7 @@ unsigned int loop_alpha(unsigned int n, byte*** out) {
 		list[i] = malloc(sizeof(char) * (n + 1)); // +1 for \0 (easier debugging)
 	}
 
-	char* str = malloc(sizeof(char) * (n + 1)); // +1 for \0 (easier debugging)
+	byte* str = malloc(sizeof(char) * (n + 1)); // +1 for \0 (easier debugging)
 
 	int i;
 	for (i = 0; i < n; i++) {  // sets initial value to all a
@@ -39,7 +39,7 @@ unsigned int loop_alpha(unsigned int n, byte*** out) {
 	unsigned int digit = n - 1;
 
 	i = 0;
-	memcpy(list[i++], str, n);
+	memcpy(list[i++], str, n + 1); // +1 for \0 (easier debugging)
 	while (i < size) {
 		++str[digit];
 		if (str[digit] > 'z') {
@@ -53,7 +53,7 @@ unsigned int loop_alpha(unsigned int n, byte*** out) {
 			digit = n - 1;
 		}
 
-		memcpy(list[i++], str, n);
+		memcpy(list[i++], str, n + 1); // +1 for \0 (easier debugging)
 	}
 
 	// Give caller access to the list
