@@ -32,7 +32,6 @@ unsigned int loop_alpha(unsigned int n, byte*** out) {
 	}
 	str[n] = 0; // null terminator for easier debugging
 
-	list[0] = str;
 	//increment at digit
 	// if > 'z' set digit = 'a' and increment digit - 1
 	// digit < 0 break
