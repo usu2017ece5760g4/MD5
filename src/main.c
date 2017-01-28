@@ -39,7 +39,7 @@ inline void hash_f(uint n) {
 	free(list);
 }
 
-void main(int argc, char **argv) {
+int main(int argc, char **argv) {
 	extern char *optarg; // these are for getopt.
 	extern int optind;
 
@@ -132,4 +132,5 @@ void main(int argc, char **argv) {
 	}
 
 	//uint x = str2hex(t);
+	return 0;
 }
