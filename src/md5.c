@@ -146,7 +146,7 @@ inline void md5_setup_npartpadding(uint** hash, byte* msg, uint n) {
 	parts[chunks - 1] = &last;
 
 	for (uint i = 0; i < chunks; ++i) {
-		compress(hash, parts[i]);
+		md5_compress(hash, parts[i]);
 	}
 
 	free(parts);
