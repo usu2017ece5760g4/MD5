@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <cstdint>
 
 typedef unsigned char byte;
 typedef unsigned int uint;
