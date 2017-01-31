@@ -17,12 +17,20 @@ typedef union {
 // Note: Static linkage as these values are not useful outside of the md5 algorithm
 static const uint IV[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
 
-// Per-round shift amounts
+// Per-round access of data in 512 bit block
+static const uint k[4][16] = {
+	{  0,  1,  2,  3,     4,  5,  6,  7,     8,  9, 10, 11,    12, 13, 14, 15 },
+	{  1,  6, 11,  0,     5, 10, 15,  4,     9, 14,  3,  8,    13,  2,  7, 12 },
+	{  5,  8, 11, 14,     1,  4,  7, 10,    13,  0,  3,  6,     9, 12, 15,  2 },
+	{  0,  7, 14,  5,    12,  3, 10,  1,     8, 15,  6, 13,     4, 11,  2,  9 },
+};
+
+// Per-round circular left shift amounts
 static const uint s[4][16] = {
-	{ 7, 12, 17, 22,    7, 12, 17, 22,    7, 12, 17, 22,    7, 12, 17, 22 },
-	{ 5,  9, 14, 20,    5,  9, 14, 20,    5,  9, 14, 20,    5,  9, 14, 20 },
-	{ 4, 11, 16, 23,    4, 11, 16, 23,    4, 11, 16, 23,    4, 11, 16, 23 },
-	{ 6, 10, 15, 21,    6, 10, 15, 21,    6, 10, 15, 21,    6, 10, 15, 21 },
+	{  7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22 },
+	{  5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20 },
+	{  4, 11, 16, 23,     4, 11, 16, 23,     4, 11, 16, 23,     4, 11, 16, 23 },
+	{  6, 10, 15, 21,     6, 10, 15, 21,     6, 10, 15, 21,     6, 10, 15, 21 },
 };
 
 // Binary integer part of the sines of integers (Radians) as constants:
