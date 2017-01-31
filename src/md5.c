@@ -76,7 +76,7 @@ inline void md5_setup_nfullpadding(uint** hash, byte* msg, uint n) {
 
 	chunk last = {0};
 	last.bytes[0] = 0x80;
-	last.words[15] = n;
+	last.words[15] = n * 8;
 
 	parts[chunks - 1] = &last;
 
@@ -109,7 +109,7 @@ inline void md5_setup_nm1padding(uint** hash, byte* msg, uint n) {
 
 	chunk last = {0};
 	last.bytes[0] = 0x80;
-	last.words[15] = n;
+	last.words[15] = n * 8;
 
 	parts[chunks - 2] = &nm1;
 	parts[chunks - 1] = &last;
@@ -141,7 +141,7 @@ inline void md5_setup_npartpadding(uint** hash, byte* msg, uint n) {
 	chunk last = {0};
 	memcpy(&last, msg + ((chunks - 1) * 64), msg_m64);
 	last.bytes[msg_m64] = 0x80;
-	last.words[15] = n;
+	last.words[15] = n * 8;
 
 	parts[chunks - 1] = &last;
 
