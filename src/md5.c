@@ -182,13 +182,13 @@ inline uint md5_setup_nfullpadding(chunk*** blocks, byte* msg, uint n) {
 
 	uint i = 0;
 	for (uint i = 0; i < (block_cnt - 1); ++i) {
-		*blocks[i] = msg + (i * 64);
+		(*blocks)[i] = msg + (i * 64);
 	}
 
 	last_blocks[0].bytes[0] = 0x80;
 	last_blocks[0].words[14] = n * 8;
 
-	*blocks[block_cnt - 1] = last_blocks;
+	(*blocks)[block_cnt - 1] = last_blocks;
 
 	return block_cnt;
 }
@@ -206,7 +206,7 @@ inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
 
 	uint i = 0;
 	for (uint i = 0; i < (block_cnt - 2); ++i) {
-		*blocks[i] = msg + (i * 64);
+		(*blocks)[i] = msg + (i * 64);
 	}
 
 	uint msg_m64 = n % 64;
@@ -218,8 +218,8 @@ inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
 	last->bytes[0] = 0x80;
 	last->words[14] = n * 8;
 
-	*blocks[block_cnt - 2] = nm1;
-	*blocks[block_cnt - 1] = last;
+	(*blocks)[block_cnt - 2] = nm1;
+	(*blocks)[block_cnt - 1] = last;
 
 	return block_cnt;
 }
@@ -237,7 +237,7 @@ inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
 
 	uint i = 0;
 	for (uint i = 0; i < block_cnt - 1; ++i) {
-		*blocks[i] = msg + (i * 64);
+		(*blocks)[i] = msg + (i * 64);
 	}
 
 	uint msg_m64 = n % 64;
@@ -246,7 +246,7 @@ inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
 	last_blocks[0].bytes[msg_m64] = 0x80;
 	last_blocks[0].words[14] = n * 8;
 
-	*blocks[block_cnt - 1] = last_blocks;
+	(*blocks)[block_cnt - 1] = last_blocks;
 
 	return block_cnt;
 }
