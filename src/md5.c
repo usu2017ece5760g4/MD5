@@ -17,7 +17,7 @@ typedef union {
 // Note: Static linkage as these values are not useful outside of the md5 algorithm
 static const uint IV[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
 
-// Per-round access of data in 512 bit block
+// Per-iteration access of data in 512 bit block
 static const uint k[4][16] = {
 	{  0,  1,  2,  3,     4,  5,  6,  7,     8,  9, 10, 11,    12, 13, 14, 15 },
 	{  1,  6, 11,  0,     5, 10, 15,  4,     9, 14,  3,  8,    13,  2,  7, 12 },
@@ -25,7 +25,7 @@ static const uint k[4][16] = {
 	{  0,  7, 14,  5,    12,  3, 10,  1,     8, 15,  6, 13,     4, 11,  2,  9 },
 };
 
-// Per-round circular left shift amounts
+// Per-iteration circular left shift amounts
 static const uint s[4][16] = {
 	{  7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22 },
 	{  5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20 },
@@ -58,6 +58,20 @@ static const uint T[4][16] = {
 //---------------------------------------------------------------------------------------------------------------------+
 // </Precompiled constants used in the md5 hashing algorithm>                                                          |
 //---------------------------------------------------------------------------------------------------------------------+
+
+//---------------------------------------------------------------------------------------------------------------------+
+// The compression unit 'g' of each round                                                                              |
+//---------------------------------------------------------------------------------------------------------------------+
+inline uint F(uint x, uint y, uint z) { return (x & y) | (~x & z); }
+inline uint G(uint x, uint y, uint z) { return (x & z) | (y & ~z); }
+inline uint H(uint x, uint y, uint z) { return x ^ y ^ z; }
+inline uint I(uint x, uint y, uint z) { return y ^ (x | ~z); }
+
+inline void iteration(uint (*g)(uint, uint, uint), uint* a, uint* b, uint* c, uint* d, uint Xk, uint Ti, uint s) {
+	*a += g(*b, *c, *d) + Xk + Ti;
+	*a = (*a << s) | ((*a & 0xffffffff) >> (32 - s)); // Circular left shift s
+	*a += *b;
+}
 
 //---------------------------------------------------------------------------------------------------------------------+
 // An unrolled version of the md5 compression function                                                                 |
