@@ -10,8 +10,42 @@
 #include <getopt.h>
 #include "strgen.h"
 
-byte** list;
+extern const uint* md5(const byte* msg, const uint n);
+
+typedef union {
+	uint raw[4];
+	union {
+		uint word;
+		byte byte[4];
+	} words[4];
+} hash;
+
+byte* list;
 uint size;
+
+void temp() {
+	const int N = 5;
+	size = loop_alpha(N, &list);
+
+	for (uint i = 0; i < size; ++i) {
+		printf("The hash of %s is: ", (list + i * N)[i]);
+
+		hash* hash = md5((list + i * N)[i], N);
+		for (uint i = 0; i < 4; ++i) {
+			printf("%02x", hash->words[i].byte[0]);
+			printf("%02x", hash->words[i].byte[1]);
+			printf("%02x", hash->words[i].byte[2]);
+			printf("%02x", hash->words[i].byte[3]);
+		}
+		printf("\n");
+
+		free((list + i * N)[i]);
+	}
+
+	free(list);
+	size = 0;
+}
+/*
 inline void hash_n(uint n) {
 	size = loop_alpha(n, &list);
 	int i;
@@ -38,8 +72,11 @@ inline void hash_f(uint n) {
 	// need to free(list[i])
 	free(list);
 }
-
+*/
 int main(int argc, char **argv) {
+	temp();
+	return 0;
+	/*
 	extern char *optarg; // these are for getopt.
 	extern int optind;
 
@@ -132,5 +169,6 @@ int main(int argc, char **argv) {
 	}
 
 	//uint x = str2hex(t);
+	*/
 	return 0;
 }
