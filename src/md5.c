@@ -258,7 +258,7 @@ uint* md5(byte* msg, uint n) {
 	uint block_cnt;
 	chunk** blocks;
 	uint* hash = malloc(4 * sizeof(uint));
-	memcpy(hash, IV, 4);
+	memcpy(hash, IV, 4 * sizeof(uint));
 
 	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
 	uint msg_m64 = n % 64;
