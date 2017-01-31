@@ -61,12 +61,12 @@ static const uint T[4][16] = {
 //---------------------------------------------------------------------------------------------------------------------+
 // The compression unit 'g' of each round                                                                              |
 //---------------------------------------------------------------------------------------------------------------------+
-inline uint F(uint x, uint y, uint z) { return (x & y) | (~x & z); }
-inline uint G(uint x, uint y, uint z) { return (x & z) | (y & ~z); }
-inline uint H(uint x, uint y, uint z) { return x ^ y ^ z; }
-inline uint I(uint x, uint y, uint z) { return y ^ (x | ~z); }
+inline const uint F(const uint x, const uint y, const uint z) { return (x & y) | (~x & z); }
+inline const uint G(const uint x, const uint y, const uint z) { return (x & z) | (y & ~z); }
+inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z; }
+inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
 
-inline void iteration(uint (*g)(uint, uint, uint), uint* a, uint* b, uint* c, uint* d, uint Xk, uint Ti, uint s) {
+inline void iteration(uint (*const g)(const uint, const uint, const uint), uint* a, const uint* b, const uint* c, const uint* d, const uint Xk, const uint Ti, const uint s) {
 	*a += g(*b, *c, *d) + Xk + Ti;
 	*a = (*a << s) | (*a >> (32 - s)); // Circular left shift s
 	*a += *b;
@@ -75,14 +75,14 @@ inline void iteration(uint (*g)(uint, uint, uint), uint* a, uint* b, uint* c, ui
 //---------------------------------------------------------------------------------------------------------------------+
 // An unrolled version of the md5 compression function                                                                 |
 //---------------------------------------------------------------------------------------------------------------------+
-inline void md5_compress(uint* hash, chunk* block) {
+inline void md5_compress(uint* hash, const chunk* block) {
 	uint* a = &hash[0];
 	uint* b = &hash[1];
 	uint* c = &hash[2];
 	uint* d = &hash[3];
 
 	// Final step adds CVq to output of the 64th iteration to obtain CVq+1
-	uint
+	const uint
 		cva = *a,
 		cvb = *b,
 		cvc = *c,
@@ -174,8 +174,8 @@ static chunk* last_blocks;
 // | message                               |   | 100000000000000000000000000000 | size |                               |
 // +---------------------------------------+   +---------------------------------------+                               |
 //---------------------------------------------------------------------------------------------------------------------+
-inline uint md5_setup_nfullpadding(chunk*** blocks, byte* msg, uint n) {
-	uint block_cnt = (n / 64) + 1;
+inline const uint md5_setup_nfullpadding(chunk*** blocks, const byte* msg, const uint n) {
+	const uint block_cnt = (n / 64) + 1;
 	*blocks = malloc(block_cnt * sizeof(chunk*));
 	last_blocks = calloc(1, sizeof(chunk));
 
@@ -198,8 +198,8 @@ inline uint md5_setup_nfullpadding(chunk*** blocks, byte* msg, uint n) {
 // | message                    | 10000000 |   | 000000000000000000000000000000 | size |                               |
 // +---------------------------------------+   +---------------------------------------+                               |
 //---------------------------------------------------------------------------------------------------------------------+
-inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
-	uint block_cnt = (n / 64) + 2;
+inline const uint md5_setup_nm1padding(chunk*** blocks, const byte* msg, const uint n) {
+	const uint block_cnt = (n / 64) + 2;
 	*blocks = malloc(block_cnt * sizeof(chunk*));
 	last_blocks = calloc(2, sizeof(chunk));
 
@@ -208,7 +208,7 @@ inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
 		(*blocks)[i] = msg + (i * 64);
 	}
 
-	uint msg_m64 = n % 64;
+	const uint msg_m64 = n % 64;
 
 	chunk* nm1 = &last_blocks[0];
 	memcpy(nm1, msg + ((block_cnt - 2) * 64), msg_m64);
@@ -229,8 +229,8 @@ inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
 // | message    | 10000000000000000 | size |                                                                           |
 // +---------------------------------------+                                                                           |
 //---------------------------------------------------------------------------------------------------------------------+
-inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
-	uint block_cnt = (n / 64) + 1;
+inline const uint md5_setup_npartpadding(chunk*** blocks, const byte* msg, const  uint n) {
+	const uint block_cnt = (n / 64) + 1;
 	*blocks = malloc(block_cnt * sizeof(chunk*));
 	last_blocks = calloc(1, sizeof(chunk));
 
@@ -239,7 +239,7 @@ inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
 		(*blocks)[i] = msg + (i * 64);
 	}
 
-	uint msg_m64 = n % 64;
+	const uint msg_m64 = n % 64;
 
 	memcpy(last_blocks, msg + ((block_cnt - 1) * 64), msg_m64);
 	last_blocks[0].bytes[msg_m64] = 0x80;
@@ -253,14 +253,14 @@ inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
 //---------------------------------------------------------------------------------------------------------------------+
 // Primary md5 function: returns the 128-bit hash (dynamically allocated) of "msg" with "n" bytes                      |
 //---------------------------------------------------------------------------------------------------------------------+
-uint* md5(byte* msg, uint n) {
+const uint* md5(const byte* msg, const uint n) {
 	uint block_cnt;
 	chunk** blocks;
 	uint* hash = malloc(4 * sizeof(uint));
 	memcpy(hash, IV, 4 * sizeof(uint));
 
 	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
-	uint msg_m64 = n % 64;
+	const uint msg_m64 = n % 64;
 	if (msg_m64 == 0) {
 		block_cnt = md5_setup_nfullpadding(&blocks, msg, n);
 	}
