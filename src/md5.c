@@ -213,9 +213,9 @@ inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
 
 	chunk* nm1 = &last_blocks[0];
 	memcpy(nm1, msg + ((block_cnt - 2) * 64), msg_m64);
+	nm1->bytes[msg_m64] = 0x80;
 
 	chunk* last = &last_blocks[1];
-	last->bytes[0] = 0x80;
 	last->words[14] = n * 8;
 
 	(*blocks)[block_cnt - 2] = nm1;
