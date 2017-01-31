@@ -15,22 +15,20 @@ uint power(uint a, uint b) {
 
 uint loop_alpha(uint n, byte*** out) {
 	// Compute the size we need for out: N = 26 ^ n
-	uint size;
-	size = power(26, n);
+	uint size = power(26, n);
 
 	// Create a list of size N
 	byte** list = malloc(sizeof(char*) * size);
 	for (uint i = 0; i < size; i++) {
-		list[i] = (byte*)malloc(sizeof(char) * (n + 1)); // +1 for \0 (easier debugging)
+		list[i] = (byte*)malloc(sizeof(char) * n);
 	}
 
-	byte* str = (byte*)malloc(sizeof(char) * (n + 1)); // +1 for \0 (easier debugging)
+	byte* str = (byte*)malloc(sizeof(char) * n);
 
 	uint i;
 	for (i = 0; i < n; i++) {  // sets initial value to all a
 		str[i] = 'a';
 	}
-	str[n] = 0; // null terminator for easier debugging
 
 	//increment at digit
 	// if > 'z' set digit = 'a' and increment digit - 1
@@ -38,7 +36,7 @@ uint loop_alpha(uint n, byte*** out) {
 	uint digit = n - 1;
 
 	i = 0;
-	memcpy(list[i++], str, n + 1); // +1 for \0 (easier debugging)
+	memcpy(list[i++], str, n);
 	while (i < size) {
 		++str[digit];
 		if (str[digit] > 'z') {
@@ -52,7 +50,7 @@ uint loop_alpha(uint n, byte*** out) {
 			digit = n - 1;
 		}
 
-		memcpy(list[i++], str, n + 1); // +1 for \0 (easier debugging)
+		memcpy(list[i++], str, n);
 	}
 
 	// Give caller access to the list
