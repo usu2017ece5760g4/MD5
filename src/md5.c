@@ -19,10 +19,10 @@ static const uint IV[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
 
 // Per-iteration access of data in 512 bit block
 static const uint k[4][16] = {
-	{  0,  1,  2,  3,     4,  5,  6,  7,     8,  9, 10, 11,    12, 13, 14, 15 },
-	{  1,  6, 11,  0,     5, 10, 15,  4,     9, 14,  3,  8,    13,  2,  7, 12 },
-	{  5,  8, 11, 14,     1,  4,  7, 10,    13,  0,  3,  6,     9, 12, 15,  2 },
-	{  0,  7, 14,  5,    12,  3, 10,  1,     8, 15,  6, 13,     4, 11,  2,  9 },
+	{  0,  1,  2,  3,     4,  5,  6,  7,     8,  9, 10, 11,    12, 13, 14, 15 }, // i
+	{  1,  6, 11,  0,     5, 10, 15,  4,     9, 14,  3,  8,    13,  2,  7, 12 }, // (5i + 1) % 16
+	{  5,  8, 11, 14,     1,  4,  7, 10,    13,  0,  3,  6,     9, 12, 15,  2 }, // (3i + 5) % 16
+	{  0,  7, 14,  5,    12,  3, 10,  1,     8, 15,  6, 13,     4, 11,  2,  9 }, // (7i) % 16
 };
 
 // Per-iteration circular left shift amounts
@@ -69,7 +69,7 @@ inline uint I(uint x, uint y, uint z) { return y ^ (x | ~z); }
 
 inline void iteration(uint (*g)(uint, uint, uint), uint* a, uint* b, uint* c, uint* d, uint Xk, uint Ti, uint s) {
 	*a += g(*b, *c, *d) + Xk + Ti;
-	*a = (*a << s) | ((*a & 0xffffffff) >> (32 - s)); // Circular left shift s
+	*a = (*a << s) | (*a >> (32 - s)); // Circular left shift s
 	*a += *b;
 }
 
