@@ -65,26 +65,22 @@ inline void md5_compress(uint* hash, chunk* block) {
 // | message                               |   | 100000000000000000000000000000 | size |                               |
 // +---------------------------------------+   +---------------------------------------+                               |
 //---------------------------------------------------------------------------------------------------------------------+
-inline void md5_setup_nfullpadding(uint** hash, byte* msg, uint n) {
-	uint chunks = (n / 64) + 1;
-	chunk** parts = malloc(chunks * sizeof(chunk*));
+inline uint md5_setup_nfullpadding(chunk*** blocks, byte* msg, uint n) {
+	uint block_cnt = (n / 64) + 1;
+	*blocks = malloc(block_cnt * sizeof(chunk*));
 
 	uint i = 0;
-	for (uint i = 0; i < (chunks - 1); ++i) {
-		parts[i] = msg + (i * 64);
+	for (uint i = 0; i < (block_cnt - 1); ++i) {
+		*blocks[i] = msg + (i * 64);
 	}
 
 	chunk last = {0};
 	last.bytes[0] = 0x80;
-	last.words[15] = n * 8;
+	last.words[14] = n * 8;
 
-	parts[chunks - 1] = &last;
+	*blocks[block_cnt - 1] = &last;
 
-	for (uint i = 0; i < chunks; ++i) {
-		md5_compress(hash, parts[i]);
-	}
-
-	free(parts);
+	return block_cnt;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
@@ -93,32 +89,28 @@ inline void md5_setup_nfullpadding(uint** hash, byte* msg, uint n) {
 // | message                    | 10000000 |   | 000000000000000000000000000000 | size |                               |
 // +---------------------------------------+   +---------------------------------------+                               |
 //---------------------------------------------------------------------------------------------------------------------+
-inline void md5_setup_nm1padding(uint** hash, byte* msg, uint n) {
-	uint chunks = (n / 64) + 2;
-	chunk** parts = malloc(chunks * sizeof(chunk*));
+inline uint md5_setup_nm1padding(chunk*** blocks, byte* msg, uint n) {
+	uint block_cnt = (n / 64) + 2;
+	*blocks = malloc(block_cnt * sizeof(chunk*));
 
 	uint i = 0;
-	for (uint i = 0; i < (chunks - 2); ++i) {
-		parts[i] = msg + (i * 64);
+	for (uint i = 0; i < (block_cnt - 2); ++i) {
+		*blocks[i] = msg + (i * 64);
 	}
 
 	uint msg_m64 = n % 64;
 
 	chunk nm1 = {0};
-	memcpy(&nm1, msg + ((chunks - 2) * 64), msg_m64);
+	memcpy(&nm1, msg + ((block_cnt - 2) * 64), msg_m64);
 
 	chunk last = {0};
 	last.bytes[0] = 0x80;
-	last.words[15] = n * 8;
+	last.words[14] = n * 8;
 
-	parts[chunks - 2] = &nm1;
-	parts[chunks - 1] = &last;
+	*blocks[block_cnt - 2] = &nm1;
+	*blocks[block_cnt - 1] = &last;
 
-	for (uint i = 0; i < chunks; ++i) {
-		md5_compress(hash, parts[i]);
-	}
-
-	free(parts);
+	return block_cnt;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
@@ -127,50 +119,54 @@ inline void md5_setup_nm1padding(uint** hash, byte* msg, uint n) {
 // | message    | 10000000000000000 | size |                                                                           |
 // +---------------------------------------+                                                                           |
 //---------------------------------------------------------------------------------------------------------------------+
-inline void md5_setup_npartpadding(uint** hash, byte* msg, uint n) {
-	uint chunks = (n / 64) + 1;
-	chunk** parts = malloc(chunks * sizeof(chunk*));
+inline uint md5_setup_npartpadding(chunk*** blocks, byte* msg, uint n) {
+	uint block_cnt = (n / 64) + 1;
+	*blocks = malloc(block_cnt * sizeof(chunk*));
 
 	uint i = 0;
-	for (uint i = 0; i < chunks - 1; ++i) {
-		parts[i] = msg + (i * 64);
+	for (uint i = 0; i < block_cnt - 1; ++i) {
+		*blocks[i] = msg + (i * 64);
 	}
 
 	uint msg_m64 = n % 64;
 
 	chunk last = {0};
-	memcpy(&last, msg + ((chunks - 1) * 64), msg_m64);
+	memcpy(&last, msg + ((block_cnt - 1) * 64), msg_m64);
 	last.bytes[msg_m64] = 0x80;
-	last.words[15] = n * 8;
+	last.words[14] = n * 8;
 
-	parts[chunks - 1] = &last;
+	*blocks[block_cnt - 1] = &last;
 
-	for (uint i = 0; i < chunks; ++i) {
-		md5_compress(hash, parts[i]);
-	}
-
-	free(parts);
+	return block_cnt;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
 // Primary md5 function: returns the 128-bit hash (dynamically allocated) of "msg" with "n" bytes                      |
 //---------------------------------------------------------------------------------------------------------------------+
 uint* md5(byte* msg, uint n) {
+	uint block_cnt;
+	chunk** blocks;
 	uint* hash = malloc(4 * sizeof(uint));
 	memcpy(hash, IV, 4);
 
 	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
-
 	uint msg_m64 = n % 64;
 	if (msg_m64 == 0) {
-		md5_setup_nfullpadding(hash, msg, n);
+		block_cnt = md5_setup_nfullpadding(&blocks, msg, n);
 	}
 	else if (msg_m64 > 55) {
-		md5_setup_nm1padding(hash, msg, n);
+		block_cnt = md5_setup_nm1padding  (&blocks, msg, n);
 	}
 	else {
-		md5_setup_npartpadding(hash, msg, n);
+		block_cnt = md5_setup_npartpadding(&blocks, msg, n);
 	}
+
+	// Run the compression function each block (modifies hash in-place giving the iterative effect)
+	for (uint i = 0; i < block_cnt; ++i) {
+		md5_compress(hash, blocks[i]);
+	}
+
+	free(blocks);
 
 	return hash;
 }
