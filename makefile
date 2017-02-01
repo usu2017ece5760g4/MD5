@@ -1,17 +1,17 @@
-full: build/md5.o build/strgen.o build/main.o
-	gcc bin/*.o -o ./md5
+full: bin/md5.o bin/strgen.o bin/main.o bin
+	gcc bin/*.o -o bin/md5
 
-build/md5.o: build
-	gcc -std=c99 -O3 -c src/md5.c -o build/md5.o
+bin/md5.o: bin
+	gcc -std=c99 -O3 -c src/md5.c -o bin/md5.o -w
 
-build/strgen.o: build
-	gcc -std=c99 -O3 -m64 -c src/strgen.c -o build/strgen.o -w
+bin/strgen.o: bin
+	gcc -std=c99 -O3 -m64 -c src/strgen.c -o bin/strgen.o -w
 
-build/main.o: build
-	gcc -std=c99 -O3 -c src/main.c -o build/main.o
+bin/main.o: bin
+	gcc -std=c99 -O3 -c src/main.c -o bin/main.o -w
 
-build:
-	mkdir -p build
+bin:
+	mkdir -p bin
 
 clean:
-	rm build/*.o
+	rm bin/*
