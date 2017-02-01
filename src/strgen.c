@@ -32,7 +32,7 @@ const uint loop_alpha(const uint n, byte** out) {
 	uint digit = n - 1;
 
 	i = 0;
-	memcpy((list + i * n)[i++], str, n);
+	memcpy((list + ((i++) * n)), str, n);
 	while (i < size) {
 		++str[digit];
 		if (str[digit] > 'z') {
@@ -46,7 +46,7 @@ const uint loop_alpha(const uint n, byte** out) {
 			digit = n - 1;
 		}
 
-		memcpy((list + i * n)[i++], str, n);
+		memcpy((list + ((i++) * n)), str, n);
 	}
 
 	// Give caller access to the list

@@ -28,9 +28,9 @@ void temp() {
 	size = loop_alpha(N, &list);
 
 	for (uint i = 0; i < size; ++i) {
-		printf("The hash of %s is: ", (list + i * N)[i]);
+		printf("The hash of %.*s is: ", N, (list + (i * N)));
 
-		hash* hash = md5((list + i * N)[i], N);
+		hash* hash = md5((list + (i * N)), N);
 		for (uint i = 0; i < 4; ++i) {
 			printf("%02x", hash->words[i].byte[0]);
 			printf("%02x", hash->words[i].byte[1]);
@@ -38,8 +38,6 @@ void temp() {
 			printf("%02x", hash->words[i].byte[3]);
 		}
 		printf("\n");
-
-		free((list + i * N)[i]);
 	}
 
 	free(list);
