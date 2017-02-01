@@ -1,6 +1,6 @@
 #include "strgen.h"
 
-uint power(uint a, uint b) {
+const uint power(const uint a, uint b) {
 	uint out = 1;
 	uint square = a*a;
 	while (b > 1) {
@@ -13,7 +13,7 @@ uint power(uint a, uint b) {
 	return out;
 }
 
-uint loop_alpha(uint n, byte** out) {
+const uint loop_alpha(const uint n, byte** out) {
 	// Compute the size we need for out: N = 26 ^ n
 	uint size = power(26, n);
 
