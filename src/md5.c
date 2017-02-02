@@ -184,61 +184,6 @@ inline void md5_compress(uint* hash, const chunk* block) {
 static chunk* last_blocks;
 
 //---------------------------------------------------------------------------------------------------------------------+
-// This handles the case where the 1-bit of padding is the first bit of the nth chunk                                  |
-// +---------------------------------------+   +---------------------------------------+                               |
-// | message                               |   | 100000000000000000000000000000 | size |                               |
-// +---------------------------------------+   +---------------------------------------+                               |
-//---------------------------------------------------------------------------------------------------------------------+
-inline const uint md5_setup_nfullpadding(chunk*** blocks, const byte* msg, const uint n) {
-	const uint block_cnt = (n / 64) + 1;
-	*blocks = malloc(block_cnt * sizeof(chunk*));
-	last_blocks = calloc(1, sizeof(chunk));
-
-	uint i = 0;
-	for (uint i = 0; i < (block_cnt - 1); ++i) {
-		(*blocks)[i] = msg + (i * 64);
-	}
-
-	last_blocks[0].bytes[0] = 0x80;
-	last_blocks[0].words[14] = n * 8;
-
-	(*blocks)[block_cnt - 1] = last_blocks;
-
-	return block_cnt;
-}
-
-//---------------------------------------------------------------------------------------------------------------------+
-// This handles the case where the 1-bit of padding is in the n-1 chunk                                                |
-// +---------------------------------------+   +---------------------------------------+                               |
-// | message                    | 10000000 |   | 000000000000000000000000000000 | size |                               |
-// +---------------------------------------+   +---------------------------------------+                               |
-//---------------------------------------------------------------------------------------------------------------------+
-inline const uint md5_setup_nm1padding(chunk*** blocks, const byte* msg, const uint n) {
-	const uint block_cnt = (n / 64) + 2;
-	*blocks = malloc(block_cnt * sizeof(chunk*));
-	last_blocks = calloc(2, sizeof(chunk));
-
-	uint i = 0;
-	for (uint i = 0; i < (block_cnt - 2); ++i) {
-		(*blocks)[i] = msg + (i * 64);
-	}
-
-	const uint msg_m64 = n % 64;
-
-	chunk* nm1 = &last_blocks[0];
-	memcpy(nm1, msg + ((block_cnt - 2) * 64), msg_m64);
-	nm1->bytes[msg_m64] = 0x80;
-
-	chunk* last = &last_blocks[1];
-	last->words[14] = n * 8;
-
-	(*blocks)[block_cnt - 2] = nm1;
-	(*blocks)[block_cnt - 1] = last;
-
-	return block_cnt;
-}
-
-//---------------------------------------------------------------------------------------------------------------------+
 // This handles the case where part of the message is in the nth chunk                                                 |
 // +---------------------------------------+                                                                           |
 // | message    | 10000000000000000 | size |                                                                           |
@@ -276,15 +221,7 @@ const uint* md5(const byte* msg, const uint n) {
 
 	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
 	const uint msg_m64 = n % 64;
-	if (msg_m64 == 0) {
-		block_cnt = md5_setup_nfullpadding(&blocks, msg, n);
-	}
-	else if (msg_m64 > 55) {
-		block_cnt = md5_setup_nm1padding  (&blocks, msg, n);
-	}
-	else {
-		block_cnt = md5_setup_npartpadding(&blocks, msg, n);
-	}
+	block_cnt = md5_setup_npartpadding(&blocks, msg, n);
 
 	// Run the compression function each block (modifies hash in-place giving the iterative effect)
 	for (uint i = 0; i < block_cnt; ++i) {
