@@ -67,7 +67,7 @@ inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z
 inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
 
 #define ITERATION_PARAMS \
-	uint (*const g)(const uint, const uint, const uint), \
+	const uint (*const g)(const uint, const uint, const uint), \
 	uint* a, const uint* b, const uint* c, const uint* d, \
 	const uint Xk, const uint Ti, const uint s
 inline void iteration(ITERATION_PARAMS) {
