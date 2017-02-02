@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <immintrin.h>
 
 typedef unsigned char byte;
 typedef unsigned int uint;
@@ -61,19 +62,29 @@ static const uint T[4][16] = {
 //---------------------------------------------------------------------------------------------------------------------+
 // The compression unit 'g' of each round                                                                              |
 //---------------------------------------------------------------------------------------------------------------------+
-inline const uint F(const uint x, const uint y, const uint z) { return (x & y) | (~x & z); }
-inline const uint G(const uint x, const uint y, const uint z) { return (x & z) | (y & ~z); }
-inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z; }
-inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
+inline const __m256i F(const __m256i x, const __m256i y, const __m256i z) {
+	return _mm256_or_si256(_mm256_and_si256(x, y), _mm256_andnot_si256(x, z));
+}
+inline const __m256i G(const __m256i x, const __m256i y, const __m256i z) {
+	return _mm256_or_si256(_mm256_and_si256(x, z), _mm256_andnot_si256(z, y));
+}
+inline const __m256i H(const __m256i x, const __m256i y, const __m256i z) {
+	return _mm256_xor_si256(_mm256_xor_si256(x, y), z);
+}
+
+static const __m256i BITWISE_TRUE = _mm256_set1_epi32(0xffffffff); // This feels like a hack but whatever
+inline const __m256i I(const __m256i x, const __m256i y, const __m256i z) {
+	return _mm256_xor_si256(y, _mm256_or_si256(x, __mm256_andnot_si256(z, BITWISE_TRUE)));
+}
 
 #define ITERATION_PARAMS \
-	uint (*const g)(const uint, const uint, const uint), \
-	uint* a, const uint* b, const uint* c, const uint* d, \
-	const uint Xk, const uint Ti, const uint s
+	const __m256i (*const g)(const __m256i, const __m256i, const __m256i), \
+	__m256i* a, const __m256i* b, const __m256i* c, const __m256i* d, \
+	const __m256i Xk, const uint Ti, const uint s
 inline void iteration(ITERATION_PARAMS) {
-	*a += g(*b, *c, *d) + Xk + Ti;
-	*a = (*a << s) | (*a >> (32 - s)); // Circular left shift s
-	*a += *b;
+	*a = _mm256_add_epi32(_mm256_add_epi32(*a, g(*b, *c, *d)), _mm256_add_epi32(Xk, _mm256_set1_epi32(Ti)));
+	*a = _mm256_or_si256(_mm256_slli_epi32(*a, s), _mm256_srli_epi32(*a, (32 - s))); // Circular left shift s
+	*a = _mm256_add_epi32(*a, *b);
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
