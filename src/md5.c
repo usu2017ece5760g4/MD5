@@ -66,7 +66,11 @@ inline const uint G(const uint x, const uint y, const uint z) { return (x & z) |
 inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z; }
 inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
 
-inline void iteration(uint (*const g)(const uint, const uint, const uint), uint* a, const uint* b, const uint* c, const uint* d, const uint Xk, const uint Ti, const uint s) {
+#define ITERATION_PARAMS \
+	uint (*const g)(const uint, const uint, const uint), \
+	uint* a, const uint* b, const uint* c, const uint* d, \
+	const uint Xk, const uint Ti, const uint s
+inline void iteration(ITERATION_PARAMS) {
 	*a += g(*b, *c, *d) + Xk + Ti;
 	*a = (*a << s) | (*a >> (32 - s)); // Circular left shift s
 	*a += *b;
