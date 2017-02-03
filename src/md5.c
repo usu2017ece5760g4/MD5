@@ -9,6 +9,11 @@ typedef union {
 	uint words[16];
 } chunk;
 
+typedef union {
+	uint word;
+	byte byte[4];
+} split_word;
+
 //---------------------------------------------------------------------------------------------------------------------+
 // <Precompiled constants used in the md5 hashing algorithm>                                                           |
 //---------------------------------------------------------------------------------------------------------------------+
@@ -181,55 +186,112 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 	*d = _mm256_add_epi32(*d, cvd);
 }
 
-static chunk* last_blocks;
-
 //---------------------------------------------------------------------------------------------------------------------+
-// This handles the case where part of the message is in the nth chunk                                                 |
-// +---------------------------------------+                                                                           |
-// | message    | 10000000000000000 | size |                                                                           |
-// +---------------------------------------+                                                                           |
+// Hashes 8 lowercase alpha preimages at a time using AVX2 extensions and compare with the given hash 'needle'         |
 //---------------------------------------------------------------------------------------------------------------------+
-inline const uint md5_setup_npartpadding(chunk*** blocks, const byte* msg, const  uint n) {
-	const uint block_cnt = (n / 64) + 1;
-	*blocks = malloc(block_cnt * sizeof(chunk*));
-	last_blocks = calloc(1, sizeof(chunk));
+inline const uint md5_hash(__m256i* needle, __m256i* block) {
+	_m256i hash[4] = {
+		_mm256_set1_epi32(IV[0]),
+		_mm256_set1_epi32(IV[1]),
+		_mm256_set1_epi32(IV[2]),
+		_mm256_set1_epi32(IV[3]),
+	};
 
-	uint i = 0;
-	for (uint i = 0; i < block_cnt - 1; ++i) {
-		(*blocks)[i] = msg + (i * 64);
-	}
+	md5_compress(hash, block);
 
-	const uint msg_m64 = n % 64;
-
-	memcpy(last_blocks, msg + ((block_cnt - 1) * 64), msg_m64);
-	last_blocks[0].bytes[msg_m64] = 0x80;
-	last_blocks[0].words[14] = n * 8;
-
-	(*blocks)[block_cnt - 1] = last_blocks;
-
-	return block_cnt;
+	// Compare hash with needle
+	// return -1 if no match
+	// return index (0 < i < 8) if match
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
-// Primary md5 function: returns the 128-bit hash (dynamically allocated) of "msg" with "n" bytes                      |
+// It can't be helped, the setup in this function is a little confusing                                                |
+// Sets up batches of 8 preimages to be hashed as well as a needle to test for equality                                |
 //---------------------------------------------------------------------------------------------------------------------+
-const uint* md5(const byte* msg, const uint n) {
-	uint block_cnt;
-	chunk** blocks;
-	uint* hash = malloc(4 * sizeof(uint));
-	memcpy(hash, IV, 4 * sizeof(uint));
+void md5_attack(uint* hash, const uint n) {
+	// needle allows us to compare all 8 hashes to our target at once
+	__m256i needle[4] = {
+		_mm256_set1_epi32(hash[0]),
+		_mm256_set1_epi32(hash[1]),
+		_mm256_set1_epi32(hash[2]),
+		_mm256_set1_epi32(hash[3])
+	};
 
-	// Compartmentalize into 512 bit (64 byte) chunks (including the message length at the end)
-	const uint msg_m64 = n % 64;
-	block_cnt = md5_setup_npartpadding(&blocks, msg, n);
+	// The format of a single 512 bit block
+	chunk layout = { 0 };
+	for (uint i = 0; i < n; ++i) {
+		layout.bytes[i] = 'a';
+	}
+	layout.bytes[n] = 0x80;
+	layout.words[14] = n * 8;
 
-	// Run the compression function each block (modifies hash in-place giving the iterative effect)
-	for (uint i = 0; i < block_cnt; ++i) {
-		md5_compress(hash, blocks[i]);
+	// A vector of 8 512-bit blocks (copied from layout)
+	__m256i preimages[16] = {
+		_mm256_set1_epi32(layout.words[0]),
+		_mm256_set1_epi32(layout.words[1]),
+		_mm256_set1_epi32(layout.words[2]),
+		_mm256_set1_epi32(layout.words[3]),
+		_mm256_set1_epi32(layout.words[4]),
+		_mm256_set1_epi32(layout.words[5]),
+		_mm256_set1_epi32(layout.words[6]),
+		_mm256_set1_epi32(layout.words[7]),
+		_mm256_set1_epi32(layout.words[8]),
+		_mm256_set1_epi32(layout.words[9]),
+		_mm256_set1_epi32(layout.words[10]),
+		_mm256_set1_epi32(layout.words[11]),
+		_mm256_set1_epi32(layout.words[12]),
+		_mm256_set1_epi32(layout.words[13]),
+		_mm256_set1_epi32(layout.words[14]),
+		_mm256_set1_epi32(layout.words[15])
+	};
+
+	// Get all hashes incrementally different from each other
+	uint digit = n - 1;
+	for (uint i = 1; i < 7; ++i) {
+		byte* const letter = &(split_word)(preimages[digit / 4].m256i_u32[i]).byte[digit % 4] += i;
 	}
 
-	free(last_blocks);
-	free(blocks);
+	// At this point we have our first 8 hashes, so do a hash before entering the loop
+	if (md5_hash(needle, preimages)) {
+		return;
+	}
 
-	return hash;
+	// Each run through the loop will iterate over one of the 8 hashes in the preimages buffer
+	uint i = 0;
+
+	// Increment by 8 in the least significant digit and by 1 in more significant digits in the case of overflow
+	uint increment = 8;
+
+	// An in-place loop to check all the hashes for a lowercase alpha password of lenth n
+	while (1) {
+		byte* const letter = &(split_word)(preimages[digit / 4].m256i_u32[i]).byte[digit % 4];
+		(*letter) += increment;
+
+		if ((*letter) > 'z') {
+			increment = 1; // Increment by 1 when handling overflow
+			(*letter) = 'a';
+			if (--digit < 0) {
+				break;
+			}
+			continue;
+		}
+		else if (digit < n - 1) {
+			digit = n - 1;
+			increment = 8; // Finished with overflow
+		}
+
+		if (++i > 7) {
+			i = 0;
+			if (md5_hash(needle, preimages)) {
+				return;
+			}
+		}
+	}
+
+	// There may still be a couple outliers
+	if (i > 0) {
+		if (md5_hash(needle, preimages)) {
+			return;
+		}
+	}
 }
