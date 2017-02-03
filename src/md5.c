@@ -77,9 +77,8 @@ inline const __m256i H(const __m256i x, const __m256i y, const __m256i z) {
 	return _mm256_xor_si256(_mm256_xor_si256(x, y), z);
 }
 
-static const __m256i BITWISE_TRUE = _mm256_set1_epi32(0xffffffff); // This feels like a hack but whatever
 inline const __m256i I(const __m256i x, const __m256i y, const __m256i z) {
-	return _mm256_xor_si256(y, _mm256_or_si256(x, __mm256_andnot_si256(z, BITWISE_TRUE)));
+	return _mm256_xor_si256(y, _mm256_or_si256(x, _mm256_andnot_si256(z, _mm256_set1_epi32(0xffffffff))));
 }
 
 #define ITERATION_PARAMS \
@@ -190,7 +189,7 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 // Hashes 8 lowercase alpha preimages at a time using AVX2 extensions and compare with the given hash 'needle'         |
 //---------------------------------------------------------------------------------------------------------------------+
 inline const uint md5_hash(__m256i* needle, __m256i* block) {
-	_m256i hash[4] = {
+	__m256i hash[4] = {
 		_mm256_set1_epi32(IV[0]),
 		_mm256_set1_epi32(IV[1]),
 		_mm256_set1_epi32(IV[2]),
