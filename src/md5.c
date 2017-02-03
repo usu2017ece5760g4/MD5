@@ -97,7 +97,7 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 	__m256i* d = &hash[3];
 
 	// Final step adds CVq to output of the 64th iteration to obtain CVq+1
-	const uint
+	const __m256i
 		cva = *a,
 		cvb = *b,
 		cvc = *c,
@@ -175,10 +175,10 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 	iteration(I,    c, d, a, b,    block[k[3][14]],    T[3][14],    s[3][14]);
 	iteration(I,    b, c, d, a,    block[k[3][15]],    T[3][15],    s[3][15]);
 
-	*a += cva;
-	*b += cvb;
-	*c += cvc;
-	*d += cvd;
+	*a = _mm256_add_epi32(*a, cva);
+	*b = _mm256_add_epi32(*b, cvb);
+	*c = _mm256_add_epi32(*c, cvc);
+	*d = _mm256_add_epi32(*d, cvd);
 }
 
 static chunk* last_blocks;
