@@ -76,7 +76,6 @@ inline const __m256i G(const __m256i x, const __m256i y, const __m256i z) {
 inline const __m256i H(const __m256i x, const __m256i y, const __m256i z) {
 	return _mm256_xor_si256(_mm256_xor_si256(x, y), z);
 }
-
 inline const __m256i I(const __m256i x, const __m256i y, const __m256i z) {
 	return _mm256_xor_si256(y, _mm256_or_si256(x, _mm256_andnot_si256(z, _mm256_set1_epi32(0xffffffff))));
 }
@@ -186,7 +185,7 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
-// Hashes 8 lowercase alpha preimages at a time using AVX2 extensions and compare with the given hash 'needle'         |
+// Hashes 8 lowercase alpha pre-images at a time using AVX2 extensions and compare with the given hash 'needle'        |
 //---------------------------------------------------------------------------------------------------------------------+
 inline const uint md5_hash(__m256i* needle, __m256i* block) {
 	__m256i hash[4] = {
@@ -205,7 +204,8 @@ inline const uint md5_hash(__m256i* needle, __m256i* block) {
 
 //---------------------------------------------------------------------------------------------------------------------+
 // It can't be helped, the setup in this function is a little confusing                                                |
-// Sets up batches of 8 preimages to be hashed as well as a needle to test for equality                                |
+// This function assumes password length less than 53 characters for simplicity                                        |
+// Sets up batches of 8 pre-images to be hashed as well as a needle to test for equality                               |
 //---------------------------------------------------------------------------------------------------------------------+
 void md5_attack(uint* hash, const uint n) {
 	// needle allows us to compare all 8 hashes to our target at once
@@ -247,7 +247,7 @@ void md5_attack(uint* hash, const uint n) {
 	// Get all hashes incrementally different from each other
 	uint digit = n - 1;
 	for (uint i = 1; i < 7; ++i) {
-		byte* const letter = &(split_word)(preimages[digit / 4].m256i_u32[i]).byte[digit % 4] += i;
+		byte* const letter = &(*split_word)(&(preimages[digit / 4].m256i_u32[i])).byte[digit % 4] += i;
 	}
 
 	// At this point we have our first 8 hashes, so do a hash before entering the loop
@@ -255,13 +255,13 @@ void md5_attack(uint* hash, const uint n) {
 		return;
 	}
 
-	// Each run through the loop will iterate over one of the 8 hashes in the preimages buffer
+	// Each run through the loop will iterate over one of the 8 hashes in the pre-images buffer
 	uint i = 0;
 
 	// Increment by 8 in the least significant digit and by 1 in more significant digits in the case of overflow
 	uint increment = 8;
 
-	// An in-place loop to check all the hashes for a lowercase alpha password of lenth n
+	// An in-place loop to check all the hashes for a lowercase alpha password of length n
 	while (1) {
 		byte* const letter = &(split_word)(preimages[digit / 4].m256i_u32[i]).byte[digit % 4];
 		(*letter) += increment;
