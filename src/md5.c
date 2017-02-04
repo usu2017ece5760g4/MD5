@@ -302,7 +302,7 @@ void print_md5(const uint* hash) {
 			uint word;
 			byte byte[4];
 		} words[4];
-	} *hout = hash;
+	} const *hout = hash;
 
 	for (uint i = 0; i < 4; ++i) {
 		printf("%02x", hout->words[i].byte[0]);
