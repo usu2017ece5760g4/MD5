@@ -9,11 +9,6 @@ typedef union {
 	uint words[16];
 } chunk;
 
-typedef union {
-	uint word;
-	byte byte[4];
-} split_word;
-
 //---------------------------------------------------------------------------------------------------------------------+
 // <Precompiled constants used in the md5 hashing algorithm>                                                           |
 //---------------------------------------------------------------------------------------------------------------------+
@@ -246,8 +241,9 @@ void md5_attack(uint* hash, const uint n) {
 
 	// Get all hashes incrementally different from each other
 	uint digit = n - 1;
-	for (uint i = 1; i < 7; ++i) {
-		byte* const letter = &(*split_word)(&(preimages[digit / 4].m256i_u32[i])).byte[digit % 4] += i;
+	for (uint i = 1; i < 8; ++i) {
+		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
+		(*letter) += i;
 	}
 
 	// At this point we have our first 8 hashes, so do a hash before entering the loop
@@ -263,7 +259,7 @@ void md5_attack(uint* hash, const uint n) {
 
 	// An in-place loop to check all the hashes for a lowercase alpha password of length n
 	while (1) {
-		byte* const letter = &(split_word)(preimages[digit / 4].m256i_u32[i]).byte[digit % 4];
+		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += increment;
 
 		if ((*letter) > 'z') {
