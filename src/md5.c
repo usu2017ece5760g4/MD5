@@ -285,3 +285,23 @@ const uint* md5(const byte* msg, const uint n) {
 
 	return hash;
 }
+
+//---------------------------------------------------------------------------------------------------------------------+
+// Prints out an md5 hash in big endian order given a little endian input                                              |
+//---------------------------------------------------------------------------------------------------------------------+
+void print_md5(const uint* hash) {
+	union {
+		uint raw[4];
+		union {
+			uint word;
+			byte byte[4];
+		} words[4];
+	} const *hout = hash;
+
+	for (uint i = 0; i < 4; ++i) {
+		printf("%02x", hout->words[i].byte[0]);
+		printf("%02x", hout->words[i].byte[1]);
+		printf("%02x", hout->words[i].byte[2]);
+		printf("%02x", hout->words[i].byte[3]);
+	}
+}
