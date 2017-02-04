@@ -1,12 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <immintrin.h>
-
-// Used lowercase alpha for benchmarking
-#define ATTACK_START 'a'
-#define ATTACK_STOP  'z'
-
-typedef unsigned char byte;
-typedef unsigned int uint;
+#include "benchtime.h"
 
 typedef union {
 	byte bytes[64];
@@ -293,5 +288,25 @@ void md5_attack(const uint* hash, const uint n) {
 		if (md5_hash(needle, preimages) != -1) {
 			return;
 		}
+	}
+}
+
+//---------------------------------------------------------------------------------------------------------------------+
+// Prints out an md5 hash in big endian order given a little endian input                                              |
+//---------------------------------------------------------------------------------------------------------------------+
+void print_md5(const uint* hash) {
+	union {
+		uint raw[4];
+		union {
+			uint word;
+			byte byte[4];
+		} words[4];
+	} *hout = hash;
+
+	for (uint i = 0; i < 4; ++i) {
+		printf("%02x", hout->words[i].byte[0]);
+		printf("%02x", hout->words[i].byte[1]);
+		printf("%02x", hout->words[i].byte[2]);
+		printf("%02x", hout->words[i].byte[3]);
 	}
 }

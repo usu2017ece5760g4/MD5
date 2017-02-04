@@ -1,4 +1,16 @@
-// Borrowed from http://stackoverflow.com/a/1861337
+#pragma once
+
+// Used lowercase alpha for benchmarking
+#define ATTACK_START 'a'
+#define ATTACK_STOP  'z'
+
+typedef unsigned char byte;
+typedef unsigned int uint;
+
+extern void md5_attack(const uint* hash, const uint n);
+extern void print_md5(const uint* hash);
+
+// Code Below Borrowed from http://stackoverflow.com/a/1861337
 // Granularity is 15 ms on windows; on linux it is implementation dependent, but it usually 15 ms as well
 
 #ifdef _WIN32
