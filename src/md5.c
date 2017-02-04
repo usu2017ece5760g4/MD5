@@ -1,7 +1,5 @@
 #include <stdlib.h>
-
-typedef unsigned char byte;
-typedef unsigned int uint;
+#include "benchtime.h"
 
 typedef union {
 	byte bytes[64];
