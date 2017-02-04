@@ -319,7 +319,7 @@ __global__ void md5_attack(const uint* needle, const uint n) {
 		// Maybe compare with needle?
 	}
 }
-
+/*
 //---------------------------------------------------------------------------------------------------------------------+
 // Prints out an md5 hash in big endian order given a little endian input                                              |
 //---------------------------------------------------------------------------------------------------------------------+
@@ -339,3 +339,4 @@ void print_md5(const uint* hash) {
 		printf("%02x", hout->words[i].byte[3]);
 	}
 }
+*/
