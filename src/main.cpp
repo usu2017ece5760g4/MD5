@@ -14,6 +14,7 @@ typedef unsigned int uint;
 
 extern const uint* md5(const byte* msg, const uint n);
 
+/*
 void print_hash(uint* hash) {
 	union {
 		uint raw[4];
@@ -30,6 +31,7 @@ void print_hash(uint* hash) {
 		printf("%02x", hout->words[i].byte[3]);
 	}
 }
+*/
 
 int main(int argc, char **argv) {
 	const int N = 6;
