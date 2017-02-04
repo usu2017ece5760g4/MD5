@@ -7,6 +7,7 @@
 //---------------------------------------------------------------------------------------------------------------------+
 #include <stdlib.h>
 #include <stdio.h>
+#include <thread>
 #include "benchtime.h"
 
 typedef unsigned char byte;
@@ -32,6 +33,10 @@ void print_hash(uint* hash) {
 	}
 }
 */
+
+void md5_thread(const uint* hash, const uint n, const char msb) {
+
+}
 
 int main(int argc, char **argv) {
 	const int N = 6;
