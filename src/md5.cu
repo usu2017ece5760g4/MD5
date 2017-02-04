@@ -284,6 +284,42 @@ const uint* md5(const byte* msg, const uint n) {
 	return hash;
 }
 
+__global__ void md5_attack(const uint* needle, const uint n) {
+	uint tid = threadIdx.x;
+
+	chunk block = { 0 };
+	block.bytes[0] = ATTACK_START + (tid / (ATTACK_STOP - ATTACK_START));
+	block.bytes[1] = ATTACK_START + (tid % (ATTACK_STOP - ATTACK_START));
+	for (uint i = 2; i < n; ++i) {
+		block.bytes[i] = ATTACK_START;
+	}
+	block.bytes[n] = 0x80;
+	block.words[14] = n * 8;
+
+	// Each run through the loop will iterate over one of the 8 hashes in the pre-images buffer
+	uint i = 0;
+
+	// An in-place loop to check all the hashes for a password of length n (within our range)
+	while (1) {
+		++block.bytes[digit];
+
+		if (block.bytes[digit] > ATTACK_STOP) {
+			block.bytes[digit] = ATTACK_START;
+			if (--digit < 2) { // Thread stops at msb + 2
+				break;
+			}
+			continue;
+		}
+		else if (digit < n - 1) {
+			digit = n - 1;
+		}
+
+		uint hash[4] = { IV[0], IV[1], IV[2], IV[3] };
+		md5_compress(hash, block);
+		// Maybe compare with needle?
+	}
+}
+
 //---------------------------------------------------------------------------------------------------------------------+
 // Prints out an md5 hash in big endian order given a little endian input                                              |
 //---------------------------------------------------------------------------------------------------------------------+
