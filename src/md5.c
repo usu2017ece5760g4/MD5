@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <immintrin.h>
 
+// Used lowercase alpha for benchmarking
+#define ATTACK_START 'a'
+#define ATTACK_STOP  'z'
+
 typedef unsigned char byte;
 typedef unsigned int uint;
 
@@ -180,7 +184,7 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
-// Hashes 8 lowercase alpha pre-images at a time using AVX2 extensions and compare with the given hash 'needle'        |
+// Hashes 8 pre-images at a time using AVX2 extensions and compare with the given hash 'needle'                        |
 //---------------------------------------------------------------------------------------------------------------------+
 inline const uint md5_hash(__m256i* needle, __m256i* block) {
 	__m256i hash[4] = {
@@ -195,6 +199,7 @@ inline const uint md5_hash(__m256i* needle, __m256i* block) {
 	// Compare hash with needle
 	// return -1 if no match
 	// return index (0 < i < 8) if match
+	return -1;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
@@ -214,7 +219,7 @@ void md5_attack(uint* hash, const uint n) {
 	// The format of a single 512 bit block
 	chunk layout = { 0 };
 	for (uint i = 0; i < n; ++i) {
-		layout.bytes[i] = 'a';
+		layout.bytes[i] = ATTACK_START;
 	}
 	layout.bytes[n] = 0x80;
 	layout.words[14] = n * 8;
@@ -240,14 +245,14 @@ void md5_attack(uint* hash, const uint n) {
 	};
 
 	// Get all hashes incrementally different from each other
-	uint digit = n - 1;
+	int digit = n - 1;
 	for (uint i = 1; i < 8; ++i) {
 		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += i;
 	}
 
 	// At this point we have our first 8 hashes, so do a hash before entering the loop
-	if (md5_hash(needle, preimages)) {
+	if (md5_hash(needle, preimages) != -1) {
 		return;
 	}
 
@@ -257,14 +262,14 @@ void md5_attack(uint* hash, const uint n) {
 	// Increment by 8 in the least significant digit and by 1 in more significant digits in the case of overflow
 	uint increment = 8;
 
-	// An in-place loop to check all the hashes for a lowercase alpha password of length n
+	// An in-place loop to check all the hashes for a password of length n (within our range)
 	while (1) {
 		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += increment;
 
-		if ((*letter) > 'z') {
+		if ((*letter) > ATTACK_STOP) {
 			increment = 1; // Increment by 1 when handling overflow
-			(*letter) = 'a';
+			(*letter) = ATTACK_START;
 			if (--digit < 0) {
 				break;
 			}
@@ -277,7 +282,7 @@ void md5_attack(uint* hash, const uint n) {
 
 		if (++i > 7) {
 			i = 0;
-			if (md5_hash(needle, preimages)) {
+			if (md5_hash(needle, preimages) != -1) {
 				return;
 			}
 		}
@@ -285,7 +290,7 @@ void md5_attack(uint* hash, const uint n) {
 
 	// There may still be a couple outliers
 	if (i > 0) {
-		if (md5_hash(needle, preimages)) {
+		if (md5_hash(needle, preimages) != -1) {
 			return;
 		}
 	}
