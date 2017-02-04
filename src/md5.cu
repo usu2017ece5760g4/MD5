@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include "benchtime.h"
 
@@ -12,10 +13,10 @@ typedef union {
 // Note: Precomputed values borrowed from https://en.wikipedia.org/wiki/MD5#Pseudocode
 // Note: All variables are unsigned 32 bit and wrap modulo 2^32 when calculating
 // Note: Static linkage as these values are not useful outside of the md5 algorithm
-static const uint IV[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
+__device__ static const uint IV[4] = { 0x67452301, 0xefcdab89, 0x98badcfe, 0x10325476 };
 
 // Per-iteration access of data in 512 bit block
-static const uint k[4][16] = {
+__device__ static const uint k[4][16] = {
 	{  0,  1,  2,  3,     4,  5,  6,  7,     8,  9, 10, 11,    12, 13, 14, 15 }, // i
 	{  1,  6, 11,  0,     5, 10, 15,  4,     9, 14,  3,  8,    13,  2,  7, 12 }, // (5i + 1) % 16
 	{  5,  8, 11, 14,     1,  4,  7, 10,    13,  0,  3,  6,     9, 12, 15,  2 }, // (3i + 5) % 16
@@ -23,7 +24,7 @@ static const uint k[4][16] = {
 };
 
 // Per-iteration circular left shift amounts
-static const uint s[4][16] = {
+__device__ static const uint s[4][16] = {
 	{  7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22,     7, 12, 17, 22 },
 	{  5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20,     5,  9, 14, 20 },
 	{  4, 11, 16, 23,     4, 11, 16, 23,     4, 11, 16, 23,     4, 11, 16, 23 },
@@ -31,7 +32,7 @@ static const uint s[4][16] = {
 };
 
 // Binary integer part of the sines of integers (Radians) as constants:
-static const uint T[4][16] = {
+__device__ static const uint T[4][16] = {
 	{ 0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	  0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	  0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -59,16 +60,16 @@ static const uint T[4][16] = {
 //---------------------------------------------------------------------------------------------------------------------+
 // The compression unit 'g' of each round                                                                              |
 //---------------------------------------------------------------------------------------------------------------------+
-inline const uint F(const uint x, const uint y, const uint z) { return (x & y) | (~x & z); }
-inline const uint G(const uint x, const uint y, const uint z) { return (x & z) | (y & ~z); }
-inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z; }
-inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
+__device__ inline const uint F(const uint x, const uint y, const uint z) { return (x & y) | (~x & z); }
+__device__ inline const uint G(const uint x, const uint y, const uint z) { return (x & z) | (y & ~z); }
+__device__ inline const uint H(const uint x, const uint y, const uint z) { return x ^ y ^ z; }
+__device__ inline const uint I(const uint x, const uint y, const uint z) { return y ^ (x | ~z); }
 
 #define ITERATION_PARAMS \
 	const uint (*const g)(const uint, const uint, const uint), \
 	uint* a, const uint* b, const uint* c, const uint* d, \
 	const uint Xk, const uint Ti, const uint s
-inline void iteration(ITERATION_PARAMS) {
+__device__ inline void iteration(ITERATION_PARAMS) {
 	*a += g(*b, *c, *d) + Xk + Ti;
 	*a = (*a << s) | (*a >> (32 - s)); // Circular left shift s
 	*a += *b;
@@ -77,7 +78,7 @@ inline void iteration(ITERATION_PARAMS) {
 //---------------------------------------------------------------------------------------------------------------------+
 // An unrolled version of the md5 compression function                                                                 |
 //---------------------------------------------------------------------------------------------------------------------+
-inline void md5_compress(uint* hash, const chunk* block) {
+__device__ inline void md5_compress(uint* hash, const chunk* block) {
 	uint* a = &hash[0];
 	uint* b = &hash[1];
 	uint* c = &hash[2];
@@ -226,3 +227,19 @@ void print_md5(const uint* hash) {
 	}
 }
 */
+
+#define THREADS (ATTACK_STOP - ATTACK_START) * (ATTACK_STOP - ATTACK_START)
+#define N 10
+
+int main(int argc, char **argv) {
+	// Ensure the entire range is searched
+	uint hash[4] = { 0 }; // { 0x33072edb 0xf91852e9 0xafaf7e8f 0x1a68cbdf }; // zzzzzz
+
+	uint64 start = GetTimeMs64();
+	md5_attack<<<1, THREADS >>>(&hit, message, hash, N);
+	uint64 stop = GetTimeMs64();
+
+	printf("Program ran in %u ms\n", stop - start);
+
+	return 0;
+}
