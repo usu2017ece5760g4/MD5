@@ -207,7 +207,7 @@ inline const uint md5_hash(__m256i* needle, __m256i* block) {
 // This function assumes password length less than 53 characters for simplicity                                        |
 // Sets up batches of 8 pre-images to be hashed as well as a needle to test for equality                               |
 //---------------------------------------------------------------------------------------------------------------------+
-void md5_attack(uint* hash, const uint n) {
+void md5_attack(const uint* hash, const uint n) {
 	// needle allows us to compare all 8 hashes to our target at once
 	__m256i needle[4] = {
 		_mm256_set1_epi32(hash[0]),

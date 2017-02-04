@@ -12,7 +12,7 @@
 typedef unsigned char byte;
 typedef unsigned int uint;
 
-extern void md5_attack(uint* hash, const uint n);;
+extern void md5_attack(const uint* hash, const uint n);;
 
 void print_hash(uint* hash) {
 	union {
