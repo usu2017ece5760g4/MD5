@@ -9,22 +9,16 @@
 #include <stdio.h>
 #include "benchtime.h"
 
+#define THREADS (ATTACK_STOP - ATTACK_START) * (ATTACK_STOP - ATTACK_START)
+
 int main(int argc, char **argv) {
-	const int N = 5;
+	const int N = 6;
 
-	byte* list;
-	uint size = 0; // loop_alpha(N, &list);
+	// Ensure the entire range is searched
+	uint hash[4] = { 0 };
 
-	for (uint i = 0; i < size; ++i) {
-		printf("The hash of %.*s is: ", N, (list + (i * N)));
 
-		const uint* hash = md5((list + (i * N)), N);
-		print_md5(hash);
-		printf("\n");
-	}
-
-	free(list);
-	size = 0;
+	md5_attack<<<1, THREADS >>>(hash, N);
 
 	return 0;
 }
