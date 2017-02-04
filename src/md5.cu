@@ -296,10 +296,8 @@ __global__ void md5_attack(const uint* needle, const uint n) {
 	block.bytes[n] = 0x80;
 	block.words[14] = n * 8;
 
-	// Each run through the loop will iterate over one of the 8 hashes in the pre-images buffer
-	uint i = 0;
-
 	// An in-place loop to check all the hashes for a password of length n (within our range)
+	int digit = n - 1;
 	while (1) {
 		++block.bytes[digit];
 
@@ -315,7 +313,7 @@ __global__ void md5_attack(const uint* needle, const uint n) {
 		}
 
 		uint hash[4] = { IV[0], IV[1], IV[2], IV[3] };
-		md5_compress(hash, block);
+		md5_compress(hash, &block);
 		// Maybe compare with needle?
 	}
 }
