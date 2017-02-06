@@ -264,7 +264,7 @@ void md5_attack(const uint* hash, const uint n) {
 
 		if ((*letter) > ATTACK_STOP) {
 			increment = 1; // Increment by 1 when handling overflow
-			(*letter) = ATTACK_START;
+			(*letter) -= (ATTACK_STOP - ATTACK_START) + 1;
 			if (--digit < 0) {
 				break;
 			}
