@@ -173,8 +173,10 @@ __device__ inline void md5_compress(uint* hash, const chunk* block) {
 // md5 Attack function expects to be called such that the 2msb's can be determined by thread id                        |
 // Each thread loops over n-2 least significant bits to hash every possible pre-image within the attack range          |
 //---------------------------------------------------------------------------------------------------------------------+
-__global__ void md5_attack(const uint* needle, const uint n) {
+__global__ void md5_attack(unsigned char *message, const uint* needle, const uint n) {
 	uint tid = threadIdx.x;
+
+	bool hit = false;
 
 	chunk block = { 0 };
 	block.bytes[0] = ATTACK_START + (tid / (ATTACK_STOP - ATTACK_START));
@@ -203,7 +205,18 @@ __global__ void md5_attack(const uint* needle, const uint n) {
 
 		uint hash[4] = { IV[0], IV[1], IV[2], IV[3] };
 		md5_compress(hash, &block);
-		// Maybe compare with needle?
+		if (hash[0] == needle[0] &&
+			hash[1] == needle[1] &&
+			hash[1] == needle[2] &&
+			hash[1] == needle[3]) {
+			//the first n bytes of block
+			for (int i = 0; i < n; ++i) {
+				message[i] = block.bytes[i];
+			}
+			//hit = true; 
+			break;
+
+		}
 	}
 }
 /*
@@ -232,14 +245,33 @@ void print_md5(const uint* hash) {
 #define N 10
 
 int main(int argc, char **argv) {
+	byte message[N] = { 0 };
+	byte *d_message;
+	const int n = N;
 	// Ensure the entire range is searched
-	uint hash[4] = { 0 }; // { 0x33072edb 0xf91852e9 0xafaf7e8f 0x1a68cbdf }; // zzzzzz
+	uint hash[4] = { 0x33072edb, 0xf91852e9, 0xafaf7e8f, 0x1a68cbdf }; // zzzzzz
+	uint *d_hash;
+
+	cudaMalloc(&d_message, N * sizeof(byte));
+	cudaMalloc(&d_hash, 4 * sizeof(uint));
+
+	//cudaMemcpy(message, d_message, N*sizeof(byte), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_hash, hash, 4 * sizeof(uint), cudaMemcpyHostToDevice);
 
 	uint64 start = GetTimeMs64();
-	md5_attack<<<1, THREADS >>>(&hit, message, hash, N);
+	md5_attack<<<1, THREADS>>>(d_message, hash, n);
+	cudaDeviceSynchronize();
 	uint64 stop = GetTimeMs64();
 
 	printf("Program ran in %u ms\n", stop - start);
+
+	cudaMemcpy(d_message, message, N * sizeof(byte), cudaMemcpyDeviceToHost);
+	//cudaMemcpy(hash, d_hash, 4 * sizeof(uint), cudaMemcpyDeviceToHost);
+
+	printf("the hash is created from this message: %s\n", *message);
+
+	cudaFree(d_message);
+	cudaFree(d_hash);
 
 	return 0;
 }
