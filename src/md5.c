@@ -181,7 +181,7 @@ inline void md5_compress(__m256i* hash, const __m256i* block) {
 //---------------------------------------------------------------------------------------------------------------------+
 // Hashes 8 pre-images at a time using AVX2 extensions and compare with the given hash 'needle'                        |
 //---------------------------------------------------------------------------------------------------------------------+
-inline const uint md5_hash(__m256i* needle, __m256i* block) {
+inline const uint md5_hash(__m256i* block, __m256i* needle, byte* preimage, const uint n) {
 	__m256i hash[4] = {
 		_mm256_set1_epi32(IV[0]),
 		_mm256_set1_epi32(IV[1]),
@@ -192,8 +192,31 @@ inline const uint md5_hash(__m256i* needle, __m256i* block) {
 	md5_compress(hash, block);
 
 	// Compare hash with needle
-	// return -1 if no match
+	__m256i cmp[4] = {
+		_mm256_sub_epi32(hash[0], needle[0]),
+		_mm256_sub_epi32(hash[1], needle[1]),
+		_mm256_sub_epi32(hash[2], needle[2]),
+		_mm256_sub_epi32(hash[3], needle[3])
+	};
+
 	// return index (0 < i < 8) if match
+	for (uint i = 0; i < 8; ++i) {
+		if (cmp[0].m256i_u32[i] == 0 &&
+			cmp[1].m256i_u32[i] == 0 &&
+			cmp[2].m256i_u32[i] == 0 &&
+			cmp[3].m256i_u32[i] == 0) {
+
+			// Copy the message
+			for (uint digit = 0; digit < n; ++digit) {
+				byte* const letter = (byte*)(&(block[digit / 4].m256i_u32[i])) + digit % 4;
+				preimage[digit] = *letter;
+			}
+
+			return i;
+		}
+	}
+
+	// return -1 if no match
 	return -1;
 }
 
@@ -202,7 +225,7 @@ inline const uint md5_hash(__m256i* needle, __m256i* block) {
 // This function assumes password length less than 53 characters for simplicity                                        |
 // Sets up batches of 8 pre-images to be hashed as well as a needle to test for equality                               |
 //---------------------------------------------------------------------------------------------------------------------+
-void md5_attack(const uint* hash, const uint n) {
+int md5_attack(byte* preimage, const uint* hash, const uint n) {
 	// needle allows us to compare all 8 hashes to our target at once
 	__m256i needle[4] = {
 		_mm256_set1_epi32(hash[0]),
@@ -220,7 +243,7 @@ void md5_attack(const uint* hash, const uint n) {
 	layout.words[14] = n * 8;
 
 	// A vector of 8 512-bit blocks (copied from layout)
-	__m256i preimages[16] = {
+	__m256i block[16] = {
 		_mm256_set1_epi32(layout.words[0]),
 		_mm256_set1_epi32(layout.words[1]),
 		_mm256_set1_epi32(layout.words[2]),
@@ -242,13 +265,13 @@ void md5_attack(const uint* hash, const uint n) {
 	// Get all hashes incrementally different from each other
 	int digit = n - 1;
 	for (uint i = 1; i < 8; ++i) {
-		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
+		byte* const letter = (byte*)(&(block[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += i;
 	}
 
 	// At this point we have our first 8 hashes, so do a hash before entering the loop
-	if (md5_hash(needle, preimages) != -1) {
-		return;
+	if (md5_hash(block, needle, preimage, n) != -1) {
+		return 0;
 	}
 
 	// Each run through the loop will iterate over one of the 8 hashes in the pre-images buffer
@@ -259,7 +282,7 @@ void md5_attack(const uint* hash, const uint n) {
 
 	// An in-place loop to check all the hashes for a password of length n (within our range)
 	while (1) {
-		byte* const letter = (byte*)(&(preimages[digit / 4].m256i_u32[i])) + digit % 4;
+		byte* const letter = (byte*)(&(block[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += increment;
 
 		if ((*letter) > ATTACK_STOP) {
@@ -277,18 +300,21 @@ void md5_attack(const uint* hash, const uint n) {
 
 		if (++i > 7) {
 			i = 0;
-			if (md5_hash(needle, preimages) != -1) {
-				return;
+			if (md5_hash(block, needle, preimage, n) != -1) {
+				return 0;
 			}
 		}
 	}
 
 	// There may still be a couple outliers
 	if (i > 0) {
-		if (md5_hash(needle, preimages) != -1) {
-			return;
+		if (md5_hash(block, needle, preimage, n) != -1) {
+			return 0;
 		}
 	}
+
+	// Hash not found
+	return -1;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+

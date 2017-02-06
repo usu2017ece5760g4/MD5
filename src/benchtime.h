@@ -11,7 +11,7 @@ typedef unsigned int uint;
 extern "C" {
 #endif
 
-extern void md5_attack(const uint* hash, const uint n);
+extern int md5_attack(byte* preimage, const uint* hash, const uint n);
 extern void print_md5(const uint* hash);
 
 #ifdef __cplusplus
