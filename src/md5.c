@@ -225,7 +225,7 @@ inline const uint md5_hash(__m256i* block, __m256i* needle, byte* preimage, cons
 // This function assumes password length less than 53 characters for simplicity                                        |
 // Sets up batches of 8 pre-images to be hashed as well as a needle to test for equality                               |
 //---------------------------------------------------------------------------------------------------------------------+
-int md5_attack(byte* preimage, const uint* hash, const uint n) {
+void md5_attack(volatile int* result, byte* preimage, const uint* hash, const uint n, const char msb) {
 	// needle allows us to compare all 8 hashes to our target at once
 	__m256i needle[4] = {
 		_mm256_set1_epi32(hash[0]),
@@ -236,7 +236,8 @@ int md5_attack(byte* preimage, const uint* hash, const uint n) {
 
 	// The format of a single 512 bit block
 	chunk layout = { 0 };
-	for (uint i = 0; i < n; ++i) {
+	layout.bytes[0] = msb; // Thread scans only one msb
+	for (uint i = 1; i < n; ++i) {
 		layout.bytes[i] = ATTACK_START;
 	}
 	layout.bytes[n] = 0x80;
@@ -271,7 +272,8 @@ int md5_attack(byte* preimage, const uint* hash, const uint n) {
 
 	// At this point we have our first 8 hashes, so do a hash before entering the loop
 	if (md5_hash(block, needle, preimage, n) != -1) {
-		return 0;
+		*result = 0;
+		return;
 	}
 
 	// Each run through the loop will iterate over one of the 8 hashes in the pre-images buffer
@@ -281,14 +283,14 @@ int md5_attack(byte* preimage, const uint* hash, const uint n) {
 	uint increment = 8;
 
 	// An in-place loop to check all the hashes for a password of length n (within our range)
-	while (1) {
+	while (*result == -1) {
 		byte* const letter = (byte*)(&(block[digit / 4].m256i_u32[i])) + digit % 4;
 		(*letter) += increment;
 
 		if ((*letter) > ATTACK_STOP) {
 			increment = 1; // Increment by 1 when handling overflow
 			(*letter) -= (ATTACK_STOP - ATTACK_START) + 1;
-			if (--digit < 0) {
+			if (--digit < 1) { // Thread stops at msb + 1
 				break;
 			}
 			continue;
@@ -301,20 +303,19 @@ int md5_attack(byte* preimage, const uint* hash, const uint n) {
 		if (++i > 7) {
 			i = 0;
 			if (md5_hash(block, needle, preimage, n) != -1) {
-				return 0;
+				*result = 0;
+				return;
 			}
 		}
 	}
 
 	// There may still be a couple outliers
-	if (i > 0) {
+	if (*result == -1 && i > 0) {
 		if (md5_hash(block, needle, preimage, n) != -1) {
-			return 0;
+			*result = 0;
+			return;
 		}
 	}
-
-	// Hash not found
-	return -1;
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
