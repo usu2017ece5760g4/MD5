@@ -88,94 +88,94 @@ inline void iteration(ITERATION_PARAMS) {
 // An unrolled version of the md5 compression function                                                                 |
 //---------------------------------------------------------------------------------------------------------------------+
 inline void md5_compress(__m256i* hash, const __m256i* block) {
-	__m256i* a = &hash[0];
-	__m256i* b = &hash[1];
-	__m256i* c = &hash[2];
-	__m256i* d = &hash[3];
+	__m256i a = hash[0];
+	__m256i b = hash[1];
+	__m256i c = hash[2];
+	__m256i d = hash[3];
 
 	// Final step adds CVq to output of the 64th iteration to obtain CVq+1
 	const __m256i
-		cva = *a,
-		cvb = *b,
-		cvc = *c,
-		cvd = *d;
+		cva = a,
+		cvb = b,
+		cvc = c,
+		cvd = d;
 
-	// Round 1
-	iteration(F,    a, b, c, d,    block[k[0][ 0]],    T[0][ 0],    s[0][ 0]);
-	iteration(F,    d, a, b, c,    block[k[0][ 1]],    T[0][ 1],    s[0][ 1]);
-	iteration(F,    c, d, a, b,    block[k[0][ 2]],    T[0][ 2],    s[0][ 2]);
-	iteration(F,    b, c, d, a,    block[k[0][ 3]],    T[0][ 3],    s[0][ 3]);
-	iteration(F,    a, b, c, d,    block[k[0][ 4]],    T[0][ 4],    s[0][ 4]);
-	iteration(F,    d, a, b, c,    block[k[0][ 5]],    T[0][ 5],    s[0][ 5]);
-	iteration(F,    c, d, a, b,    block[k[0][ 6]],    T[0][ 6],    s[0][ 6]);
-	iteration(F,    b, c, d, a,    block[k[0][ 7]],    T[0][ 7],    s[0][ 7]);
-	iteration(F,    a, b, c, d,    block[k[0][ 8]],    T[0][ 8],    s[0][ 8]);
-	iteration(F,    d, a, b, c,    block[k[0][ 9]],    T[0][ 9],    s[0][ 9]);
-	iteration(F,    c, d, a, b,    block[k[0][10]],    T[0][10],    s[0][10]);
-	iteration(F,    b, c, d, a,    block[k[0][11]],    T[0][11],    s[0][11]);
-	iteration(F,    a, b, c, d,    block[k[0][12]],    T[0][12],    s[0][12]);
-	iteration(F,    d, a, b, c,    block[k[0][13]],    T[0][13],    s[0][13]);
-	iteration(F,    c, d, a, b,    block[k[0][14]],    T[0][14],    s[0][14]);
-	iteration(F,    b, c, d, a,    block[k[0][15]],    T[0][15],    s[0][15]);
+	// Roun&d 1
+	iteration(F,    &a, &b, &c, &d,    block[k[0][ 0]],    T[0][ 0],    s[0][ 0]);
+	iteration(F,    &d, &a, &b, &c,    block[k[0][ 1]],    T[0][ 1],    s[0][ 1]);
+	iteration(F,    &c, &d, &a, &b,    block[k[0][ 2]],    T[0][ 2],    s[0][ 2]);
+	iteration(F,    &b, &c, &d, &a,    block[k[0][ 3]],    T[0][ 3],    s[0][ 3]);
+	iteration(F,    &a, &b, &c, &d,    block[k[0][ 4]],    T[0][ 4],    s[0][ 4]);
+	iteration(F,    &d, &a, &b, &c,    block[k[0][ 5]],    T[0][ 5],    s[0][ 5]);
+	iteration(F,    &c, &d, &a, &b,    block[k[0][ 6]],    T[0][ 6],    s[0][ 6]);
+	iteration(F,    &b, &c, &d, &a,    block[k[0][ 7]],    T[0][ 7],    s[0][ 7]);
+	iteration(F,    &a, &b, &c, &d,    block[k[0][ 8]],    T[0][ 8],    s[0][ 8]);
+	iteration(F,    &d, &a, &b, &c,    block[k[0][ 9]],    T[0][ 9],    s[0][ 9]);
+	iteration(F,    &c, &d, &a, &b,    block[k[0][10]],    T[0][10],    s[0][10]);
+	iteration(F,    &b, &c, &d, &a,    block[k[0][11]],    T[0][11],    s[0][11]);
+	iteration(F,    &a, &b, &c, &d,    block[k[0][12]],    T[0][12],    s[0][12]);
+	iteration(F,    &d, &a, &b, &c,    block[k[0][13]],    T[0][13],    s[0][13]);
+	iteration(F,    &c, &d, &a, &b,    block[k[0][14]],    T[0][14],    s[0][14]);
+	iteration(F,    &b, &c, &d, &a,    block[k[0][15]],    T[0][15],    s[0][15]);
 
-	// Round 2
-	iteration(G,    a, b, c, d,    block[k[1][ 0]],    T[1][ 0],    s[1][ 0]);
-	iteration(G,    d, a, b, c,    block[k[1][ 1]],    T[1][ 1],    s[1][ 1]);
-	iteration(G,    c, d, a, b,    block[k[1][ 2]],    T[1][ 2],    s[1][ 2]);
-	iteration(G,    b, c, d, a,    block[k[1][ 3]],    T[1][ 3],    s[1][ 3]);
-	iteration(G,    a, b, c, d,    block[k[1][ 4]],    T[1][ 4],    s[1][ 4]);
-	iteration(G,    d, a, b, c,    block[k[1][ 5]],    T[1][ 5],    s[1][ 5]);
-	iteration(G,    c, d, a, b,    block[k[1][ 6]],    T[1][ 6],    s[1][ 6]);
-	iteration(G,    b, c, d, a,    block[k[1][ 7]],    T[1][ 7],    s[1][ 7]);
-	iteration(G,    a, b, c, d,    block[k[1][ 8]],    T[1][ 8],    s[1][ 8]);
-	iteration(G,    d, a, b, c,    block[k[1][ 9]],    T[1][ 9],    s[1][ 9]);
-	iteration(G,    c, d, a, b,    block[k[1][10]],    T[1][10],    s[1][10]);
-	iteration(G,    b, c, d, a,    block[k[1][11]],    T[1][11],    s[1][11]);
-	iteration(G,    a, b, c, d,    block[k[1][12]],    T[1][12],    s[1][12]);
-	iteration(G,    d, a, b, c,    block[k[1][13]],    T[1][13],    s[1][13]);
-	iteration(G,    c, d, a, b,    block[k[1][14]],    T[1][14],    s[1][14]);
-	iteration(G,    b, c, d, a,    block[k[1][15]],    T[1][15],    s[1][15]);
+	// Roun&d 2
+	iteration(G,    &a, &b, &c, &d,    block[k[1][ 0]],    T[1][ 0],    s[1][ 0]);
+	iteration(G,    &d, &a, &b, &c,    block[k[1][ 1]],    T[1][ 1],    s[1][ 1]);
+	iteration(G,    &c, &d, &a, &b,    block[k[1][ 2]],    T[1][ 2],    s[1][ 2]);
+	iteration(G,    &b, &c, &d, &a,    block[k[1][ 3]],    T[1][ 3],    s[1][ 3]);
+	iteration(G,    &a, &b, &c, &d,    block[k[1][ 4]],    T[1][ 4],    s[1][ 4]);
+	iteration(G,    &d, &a, &b, &c,    block[k[1][ 5]],    T[1][ 5],    s[1][ 5]);
+	iteration(G,    &c, &d, &a, &b,    block[k[1][ 6]],    T[1][ 6],    s[1][ 6]);
+	iteration(G,    &b, &c, &d, &a,    block[k[1][ 7]],    T[1][ 7],    s[1][ 7]);
+	iteration(G,    &a, &b, &c, &d,    block[k[1][ 8]],    T[1][ 8],    s[1][ 8]);
+	iteration(G,    &d, &a, &b, &c,    block[k[1][ 9]],    T[1][ 9],    s[1][ 9]);
+	iteration(G,    &c, &d, &a, &b,    block[k[1][10]],    T[1][10],    s[1][10]);
+	iteration(G,    &b, &c, &d, &a,    block[k[1][11]],    T[1][11],    s[1][11]);
+	iteration(G,    &a, &b, &c, &d,    block[k[1][12]],    T[1][12],    s[1][12]);
+	iteration(G,    &d, &a, &b, &c,    block[k[1][13]],    T[1][13],    s[1][13]);
+	iteration(G,    &c, &d, &a, &b,    block[k[1][14]],    T[1][14],    s[1][14]);
+	iteration(G,    &b, &c, &d, &a,    block[k[1][15]],    T[1][15],    s[1][15]);
 
-	// Round 3
-	iteration(H,    a, b, c, d,    block[k[2][ 0]],    T[2][ 0],    s[2][ 0]);
-	iteration(H,    d, a, b, c,    block[k[2][ 1]],    T[2][ 1],    s[2][ 1]);
-	iteration(H,    c, d, a, b,    block[k[2][ 2]],    T[2][ 2],    s[2][ 2]);
-	iteration(H,    b, c, d, a,    block[k[2][ 3]],    T[2][ 3],    s[2][ 3]);
-	iteration(H,    a, b, c, d,    block[k[2][ 4]],    T[2][ 4],    s[2][ 4]);
-	iteration(H,    d, a, b, c,    block[k[2][ 5]],    T[2][ 5],    s[2][ 5]);
-	iteration(H,    c, d, a, b,    block[k[2][ 6]],    T[2][ 6],    s[2][ 6]);
-	iteration(H,    b, c, d, a,    block[k[2][ 7]],    T[2][ 7],    s[2][ 7]);
-	iteration(H,    a, b, c, d,    block[k[2][ 8]],    T[2][ 8],    s[2][ 8]);
-	iteration(H,    d, a, b, c,    block[k[2][ 9]],    T[2][ 9],    s[2][ 9]);
-	iteration(H,    c, d, a, b,    block[k[2][10]],    T[2][10],    s[2][10]);
-	iteration(H,    b, c, d, a,    block[k[2][11]],    T[2][11],    s[2][11]);
-	iteration(H,    a, b, c, d,    block[k[2][12]],    T[2][12],    s[2][12]);
-	iteration(H,    d, a, b, c,    block[k[2][13]],    T[2][13],    s[2][13]);
-	iteration(H,    c, d, a, b,    block[k[2][14]],    T[2][14],    s[2][14]);
-	iteration(H,    b, c, d, a,    block[k[2][15]],    T[2][15],    s[2][15]);
+	// Roun&d 3
+	iteration(H,    &a, &b, &c, &d,    block[k[2][ 0]],    T[2][ 0],    s[2][ 0]);
+	iteration(H,    &d, &a, &b, &c,    block[k[2][ 1]],    T[2][ 1],    s[2][ 1]);
+	iteration(H,    &c, &d, &a, &b,    block[k[2][ 2]],    T[2][ 2],    s[2][ 2]);
+	iteration(H,    &b, &c, &d, &a,    block[k[2][ 3]],    T[2][ 3],    s[2][ 3]);
+	iteration(H,    &a, &b, &c, &d,    block[k[2][ 4]],    T[2][ 4],    s[2][ 4]);
+	iteration(H,    &d, &a, &b, &c,    block[k[2][ 5]],    T[2][ 5],    s[2][ 5]);
+	iteration(H,    &c, &d, &a, &b,    block[k[2][ 6]],    T[2][ 6],    s[2][ 6]);
+	iteration(H,    &b, &c, &d, &a,    block[k[2][ 7]],    T[2][ 7],    s[2][ 7]);
+	iteration(H,    &a, &b, &c, &d,    block[k[2][ 8]],    T[2][ 8],    s[2][ 8]);
+	iteration(H,    &d, &a, &b, &c,    block[k[2][ 9]],    T[2][ 9],    s[2][ 9]);
+	iteration(H,    &c, &d, &a, &b,    block[k[2][10]],    T[2][10],    s[2][10]);
+	iteration(H,    &b, &c, &d, &a,    block[k[2][11]],    T[2][11],    s[2][11]);
+	iteration(H,    &a, &b, &c, &d,    block[k[2][12]],    T[2][12],    s[2][12]);
+	iteration(H,    &d, &a, &b, &c,    block[k[2][13]],    T[2][13],    s[2][13]);
+	iteration(H,    &c, &d, &a, &b,    block[k[2][14]],    T[2][14],    s[2][14]);
+	iteration(H,    &b, &c, &d, &a,    block[k[2][15]],    T[2][15],    s[2][15]);
 
-	// Round 4
-	iteration(I,    a, b, c, d,    block[k[3][ 0]],    T[3][ 0],    s[3][ 0]);
-	iteration(I,    d, a, b, c,    block[k[3][ 1]],    T[3][ 1],    s[3][ 1]);
-	iteration(I,    c, d, a, b,    block[k[3][ 2]],    T[3][ 2],    s[3][ 2]);
-	iteration(I,    b, c, d, a,    block[k[3][ 3]],    T[3][ 3],    s[3][ 3]);
-	iteration(I,    a, b, c, d,    block[k[3][ 4]],    T[3][ 4],    s[3][ 4]);
-	iteration(I,    d, a, b, c,    block[k[3][ 5]],    T[3][ 5],    s[3][ 5]);
-	iteration(I,    c, d, a, b,    block[k[3][ 6]],    T[3][ 6],    s[3][ 6]);
-	iteration(I,    b, c, d, a,    block[k[3][ 7]],    T[3][ 7],    s[3][ 7]);
-	iteration(I,    a, b, c, d,    block[k[3][ 8]],    T[3][ 8],    s[3][ 8]);
-	iteration(I,    d, a, b, c,    block[k[3][ 9]],    T[3][ 9],    s[3][ 9]);
-	iteration(I,    c, d, a, b,    block[k[3][10]],    T[3][10],    s[3][10]);
-	iteration(I,    b, c, d, a,    block[k[3][11]],    T[3][11],    s[3][11]);
-	iteration(I,    a, b, c, d,    block[k[3][12]],    T[3][12],    s[3][12]);
-	iteration(I,    d, a, b, c,    block[k[3][13]],    T[3][13],    s[3][13]);
-	iteration(I,    c, d, a, b,    block[k[3][14]],    T[3][14],    s[3][14]);
-	iteration(I,    b, c, d, a,    block[k[3][15]],    T[3][15],    s[3][15]);
+	// Roun&d 4
+	iteration(I,    &a, &b, &c, &d,    block[k[3][ 0]],    T[3][ 0],    s[3][ 0]);
+	iteration(I,    &d, &a, &b, &c,    block[k[3][ 1]],    T[3][ 1],    s[3][ 1]);
+	iteration(I,    &c, &d, &a, &b,    block[k[3][ 2]],    T[3][ 2],    s[3][ 2]);
+	iteration(I,    &b, &c, &d, &a,    block[k[3][ 3]],    T[3][ 3],    s[3][ 3]);
+	iteration(I,    &a, &b, &c, &d,    block[k[3][ 4]],    T[3][ 4],    s[3][ 4]);
+	iteration(I,    &d, &a, &b, &c,    block[k[3][ 5]],    T[3][ 5],    s[3][ 5]);
+	iteration(I,    &c, &d, &a, &b,    block[k[3][ 6]],    T[3][ 6],    s[3][ 6]);
+	iteration(I,    &b, &c, &d, &a,    block[k[3][ 7]],    T[3][ 7],    s[3][ 7]);
+	iteration(I,    &a, &b, &c, &d,    block[k[3][ 8]],    T[3][ 8],    s[3][ 8]);
+	iteration(I,    &d, &a, &b, &c,    block[k[3][ 9]],    T[3][ 9],    s[3][ 9]);
+	iteration(I,    &c, &d, &a, &b,    block[k[3][10]],    T[3][10],    s[3][10]);
+	iteration(I,    &b, &c, &d, &a,    block[k[3][11]],    T[3][11],    s[3][11]);
+	iteration(I,    &a, &b, &c, &d,    block[k[3][12]],    T[3][12],    s[3][12]);
+	iteration(I,    &d, &a, &b, &c,    block[k[3][13]],    T[3][13],    s[3][13]);
+	iteration(I,    &c, &d, &a, &b,    block[k[3][14]],    T[3][14],    s[3][14]);
+	iteration(I,    &b, &c, &d, &a,    block[k[3][15]],    T[3][15],    s[3][15]);
 
-	*a = _mm256_add_epi32(*a, cva);
-	*b = _mm256_add_epi32(*b, cvb);
-	*c = _mm256_add_epi32(*c, cvc);
-	*d = _mm256_add_epi32(*d, cvd);
+	hash[0] = _mm256_add_epi32(a, cva);
+	hash[1] = _mm256_add_epi32(b, cvb);
+	hash[2] = _mm256_add_epi32(c, cvc);
+	hash[3] = _mm256_add_epi32(d, cvd);
 }
 
 //---------------------------------------------------------------------------------------------------------------------+
